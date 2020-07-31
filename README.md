@@ -22,10 +22,10 @@ $ mpv-active-sockets
 /tmp/mpvsockets/1596170180
 ```
 
-To get metadata from the oldest (sockets are named based on epoch time, so `sort | head` gets the oldest) launched `mpv` instance:
+To get metadata from the oldest (sockets are named based on epoch time, so `head` gets the oldest) launched `mpv` instance:
 
 ```
-$ mpv-communicate "$(mpv-active-sockets | sort | head -n 1)" '{ "command": ["get_property", "metadata"] }' | jq
+$ mpv-communicate "$(mpv-active-sockets | head -n 1)" '{ "command": ["get_property", "metadata"] }' | jq
 {
   "data": {
     "title": "Roundabout",
