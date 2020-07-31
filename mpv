@@ -3,7 +3,7 @@
 # https://github.com/seanbreckenridge/sock-mpv
 
 socket_dir='/tmp/mpvsockets'
-mpv_path="${mpv_path:-/usr/bin/mpv}"
+mpv_path="${MPV_PATH:-/usr/bin/mpv}"
 readonly mpv_path socket_dir
 
 [[ ! -r "$mpv_path" ]] && {
