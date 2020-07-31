@@ -4,7 +4,7 @@ Dependencies: `mpv`, `socat`, `jq`.
 
 A collection of scripts to allow flexible and easier interaction with `mpv` sockets.
 
-When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the *one* socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
+When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the *one* socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening to, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
 
 If you use the one IPC socket, whenever a new instance of `mpv` is launched, the old instance gets disconnected. The `mpv` wrapper script creates a unique IPC socket for each `mpv` instance launched at `/tmp/mpvsockets`.
 
