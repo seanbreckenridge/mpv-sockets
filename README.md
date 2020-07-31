@@ -49,7 +49,7 @@ $ mpv-get-property $(mpv-active-sockets | head -n 1) path
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
 
-There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376) [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
+There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
 I use this to monitor all `mpv` instances running, so I can run a task in the background to capture what I'm currently watching/listening to with `mpv`, to generate history/most-played statistics for my local media.
 
