@@ -1,0 +1,24 @@
+#!/bin/bash
+# Sends commands to an mpv socket using socat
+# First argument: mpv socket
+# all other arguments are sent to the socket using socat
+
+SOCKET="${1:?Must provide socket as first argument}"
+if [[ -e "$SOCKET" ]]; then
+	if [[ ! -S "$SOCKET" ]]; then
+		echo "Path is not a socket: ${SOCKET}" >&2
+		exit 2
+	fi
+else
+	echo "Path doesn't exist: ${SOCKET}" >&2
+	exit 2
+fi
+readonly SOCKET
+shift # remove socket path
+
+[[ -z "$1" ]] && {
+	echo "Must provide command to pass to socat. See {} for examples" >&2
+	exit 2
+}
+
+exec socat - "$SOCKET" <<<"$@"

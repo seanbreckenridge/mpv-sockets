@@ -1,0 +1,28 @@
+#!/bin/bash
+# launches mpv with a unique mpv socket at /tmp/mpvsockets
+# https://github.com/seanbreckenridge/sock-mpv
+
+socket_dir='/tmp/mpvsockets'
+mpv_path="${mpv_path:-/usr/bin/mpv}"
+readonly mpv_path socket_dir
+
+[[ ! -r "$mpv_path" ]] && {
+	printf 'error: could not read file at %s\n' "$mpv_path" >&2
+	exit 1
+}
+
+# if user passed nothing, print mpv --help
+[[ -z "$1" ]] && {
+	exec "$mpv_path" "$@"
+}
+
+# make sockets directory
+mkdir -p "${socket_dir}" || exit $?
+
+# exec mpv, with the --input-ipc-server flag, using epoch time
+# to guarantee unique ipc sockets
+declare -a mpv_options
+mpv_options=(--input-ipc-server="${socket_dir}/$(date +%s%N)")
+mpv_options+=("$@")
+
+exec "$mpv_path" "${mpv_options[@]}"

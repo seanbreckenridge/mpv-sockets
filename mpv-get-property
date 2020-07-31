@@ -1,0 +1,26 @@
+#!/bin/bash
+# Sends commands to an mpv socket using socat
+# First argument: mpv socket
+# all other arguments are sent to the socket using socat
+
+SOCKET="${1:?Must provide socket as first argument}"
+if [[ -e "$SOCKET" ]]; then
+	if [[ ! -S "$SOCKET" ]]; then
+		echo "Path is not a socket: ${SOCKET}" >&2
+		exit 2
+	fi
+else
+	echo "Path doesn't exist: ${SOCKET}" >&2
+	exit 2
+fi
+PROPERTY="${2:?Must provide property as second argument}"
+readonly SOCKET PROPERTY
+
+# interpolate the property and capture the response
+MPV_RESP="$(socat - "$SOCKET" <<<"$(printf '{ "command": ["get_property", "%s" ] }' "$PROPERTY")")"
+err="$(echo "$MPV_RESP" | jq -r '.error')"
+[ "$err" = "success" ] || {
+	echo "Error: ${err}" 1>&2
+	exit 1
+}
+echo "$MPV_RESP" | jq -r '.data'

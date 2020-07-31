@@ -1,0 +1,32 @@
+#!/bin/bash
+# Removes any inactive mpv sockets, lists active mpv sockets
+# Exits unsuccessfully if no sockets are active
+
+readonly SOCKET_DIR='/tmp/mpvsockets'
+
+# remove any mpv sockets which fail to respond to a basic command
+is_active_socket() {
+	# send a command to determine if the socket
+	# is still active.
+	# If its dead, removes the socket and returns 1
+	if socat - "$1" <<<'{ "command": ["get_property", "metadata"] }' >/dev/null 2>&1; then
+		return 0
+	else
+		rm "$1" >&2
+		return 1
+	fi
+}
+
+# find all active sockets, remove any that arent active
+declare -a active_sockets
+active_sockets=()
+while read -r -d $'\0' socket; do
+	if is_active_socket "$socket"; then
+		active_sockets+=("$socket")
+	fi
+done < <(find "${SOCKET_DIR}" -type s -print0)
+
+[[ "${#active_sockets[@]}" == 0 ]] && exit 1
+for socket in "${active_sockets[@]}"; do
+	printf '%s\n' "${socket}"
+done
