@@ -22,10 +22,10 @@ $ mpv-active-sockets
 /tmp/mpvsockets/1596170180
 ```
 
-To get metadata from the oldest (sockets are named based on epoch time, so `head` gets the oldest) launched `mpv` instance:
+To get metadata from the oldest (sockets are named based on epoch time, so `sort | head` gets the oldest) launched `mpv` instance:
 
 ```
-$ mpv-communicate $(mpv-active-sockets | head -n 1) '{ "command": ["get_property", "metadata"] }' | jq
+$ mpv-communicate "$(mpv-active-sockets | sort | head -n 1)" '{ "command": ["get_property", "metadata"] }' | jq
 {
   "data": {
     "title": "Roundabout",
@@ -45,7 +45,7 @@ $ mpv-communicate $(mpv-active-sockets | head -n 1) '{ "command": ["get_property
 `mpv-get-property` interpolates the second argument into the `get_property` `command` syntax, but is practically no different from `mpv-communicate`
 
 ```
-$ mpv-get-property $(mpv-active-sockets | head -n 1) path
+$ mpv-get-property "$(mpv-active-sockets)" path  # this works if theres only one instance of mpv active
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
 
