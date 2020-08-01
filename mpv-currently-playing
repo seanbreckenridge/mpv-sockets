@@ -3,12 +3,15 @@
 # If there are multiple sockets, presents you with fzf to pick one
 # Can also provide an alternate command as a sink, like:
 # mpv-currently-playing cat
+#
+# Do mpv-currently-playing 2>/dev/null to ignore errors from mpv
+# instances which are streaming media instead of playing a local path
 
 declare -a full_paths
 full_paths=()
 for socket in $(mpv-active-sockets); do
-  if SONG_PATH="$(mpv-get-property "$socket" 'path')" 2>/dev/null; then
-    # if this is a full path
+  if SONG_PATH="$(mpv-get-property "$socket" 'path' 2>/dev/null)"; then
+    # if the path doesnt correspond to its absolute path, or this doesnt exist, try prepending the working directory
     [[ -n "$SONG_PATH" && -e "$SONG_PATH" ]] || {
       SONG_PATH="$(mpv-get-property "$socket" 'working-directory')/${SONG_PATH}"
     }
