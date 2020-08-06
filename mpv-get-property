@@ -19,7 +19,7 @@ readonly SOCKET PROPERTY
 # interpolate the property and capture the response
 MPV_RESP="$(socat - "$SOCKET" <<<"$(printf '{ "command": ["get_property", "%s" ] }' "$PROPERTY")")"
 err="$(echo "$MPV_RESP" | jq -r '.error')"
-[ "$err" = "success" ] || {
+[[ "$err" = "success" ]] || {
 	echo "Error: ${err}" 1>&2
 	exit 1
 }
