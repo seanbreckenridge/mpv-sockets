@@ -17,7 +17,7 @@ readonly SOCKET
 shift # remove socket path
 
 [[ -z "$1" ]] && {
-	echo "Must provide command to pass to socat. See {} for examples" >&2
+	echo "Must provide command to pass to socat. See https://github.com/seanbreckenridge/mpv-sockets for examples" >&2
 	exit 2
 }
 

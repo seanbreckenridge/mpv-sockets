@@ -49,9 +49,11 @@ $ mpv-get-property "$(mpv-active-sockets)" path  # this works if theres only one
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
 
-`mpv-currently-playing` is a `mpv-get-property` wrapper that gets full path of currently playing song. If there are multiple sockets, presents you with `fzf` to pick one Can also provide an alternate command as a sink, like:
+`mpv-currently-playing` is a `mpv-get-property` wrapper that gets information about the currently playing mpv instance. If there are multiple sockets, prints multiple lines, with one for each socket.
 
-`mpv-currently-playing cat 2>/dev/null`, which could print the full paths of the file all current `mpv` instances are playing. (The `2>/dev/null` makes it so the output doesn't include errors from `mpv` streaming videos, for example)
+By default that will print the full path of the song thats currently playing, but you can provide the `--socket` flag to print the sockets instead. Thats used in `mpv-play-pause`, which keeps track of which sockets were recently paused. If that socket can be resumed, it does that; else, tries to look for another paused mpv instance. Can also be used with `mpv-communicate` to go to the next song:
+
+`mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["set_property", "percent-pos", 100 ] }'`
 
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 

@@ -1,0 +1,46 @@
+#!/bin/bash
+# keeps track of which sockets were recently
+# paused by this script
+#
+# if that socket can be resumed, does that
+# else, tries to look for another paused
+# mpv instance and resumes that
+
+readonly last_playing='/tmp/mpv-recently-paused'
+declare -a currently_playing all_sockets
+
+toggle() {
+	mpv-communicate "$1" 'cycle pause'
+	return $?
+}
+
+IFS=$'\n'
+# if something is playing, stop it and link it to /tmp/mpv-recently-paused
+if currently_playing=($(mpv-currently-playing --socket)); then
+	rm -f "$last_playing"
+	# get the most recently launched currently playing mpv instance
+	most_recent="${currently_playing[-1]}"
+	echo "Pausing ${most_recent}..."
+	toggle "$most_recent" || exit $?
+	ln -s "$most_recent" "$last_playing"
+else
+	# nothing is playing, try to start '/tmp/mpv-recently-paused' if that mpv instance is still active
+	if toggle "$last_playing"; then
+		echo "Found recently paused socket, resuming..."
+	else
+		echo "Couldn't start a recently paused socket..." >&2
+		echo "Starting the most recent mpv instance, if one exists..."
+		if all_sockets=($(mpv-active-sockets)); then
+			most_recent="${all_sockets[-1]}"
+			if toggle "$most_recent"; then
+				echo "Success!"
+			else
+				echo "Failed..." >&2
+				exit 1
+			fi
+		else
+			echo "No active mpv instances... exiting" >&2
+			exit 1
+		fi
+	fi
+fi

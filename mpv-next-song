@@ -1,0 +1,11 @@
+#!/bin/bash
+
+IFS=$'\n'
+declare -a playing
+
+if playing=($(mpv-currently-playing --socket)); then
+	exec mpv-communicate "${playing[-1]}" '{ "command": ["set_property", "percent-pos", 100 ] }'
+else
+	echo "No mpv instances which are currently playing media..." >&2
+	exit 1
+fi

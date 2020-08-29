@@ -1,45 +1,62 @@
 #!/bin/bash
 # mpv-get-property wrapper that gets full path of currently playing song
-# If there are multiple sockets, presents you with fzf to pick one
-# Can also provide an alternate command as a sink, like:
-# mpv-currently-playing cat
+# If there are multiple instances of mpv playing at the same time,
+# prints both
 #
-# However, its unlikely that multiple items are playing at the same
-# time anyways, so this will typically just return the one item
+# Can provide the --socket flag to instead print the socket of the
+# current mpv instance
 #
 # Do mpv-currently-playing 2>/dev/null to ignore errors from mpv
 # instances which are streaming media instead of playing a local path
 
-declare -a full_paths=()
+declare PRINT_SOCKET=''
+while [[ -n "$1" ]]; do
+	case "$1" in
+	--socket)
+		PRINT_SOCKET='1'
+		;;
+	*)
+		printf 'Unknown option passed: %s\n' "$1" >&2
+		exit 1
+		;;
+	esac
+	shift
+done
+readonly PRINT_SOCKET
+
+declare -a result=()
 for socket in $(mpv-active-sockets); do
-	if SONG_PATH="$(mpv-get-property "$socket" 'path' 2>/dev/null)"; then
-		# if the path doesnt correspond to its absolute path, or this doesnt exist, try prepending the working directory
-		[[ -n "$SONG_PATH" && -e "$SONG_PATH" ]] || {
-			SONG_PATH="$(mpv-get-property "$socket" 'working-directory')/${SONG_PATH}"
-		}
-		if [[ -e "$SONG_PATH" ]]; then
-			# ignore items that aren't playing
-			IS_PAUSED="$(mpv-get-property "$socket" 'pause')"
-			[[ "$IS_PAUSED" == "true" ]] && continue
-			full_paths+=("$SONG_PATH")
-		else
-			echo "Error: ${SONG_PATH} doesn't exist" >&2
+
+	# ignore items that aren't playing
+	IS_PAUSED="$(mpv-get-property "$socket" 'pause')"
+	[[ "$IS_PAUSED" == "true" ]] && continue
+
+	if [[ -n "$PRINT_SOCKET" ]]; then # if user asked for socket, just print the socket
+		result+=("$socket")
+	else # else, try to get the full song path
+		if SONG_PATH="$(mpv-get-property "$socket" 'path' 2>/dev/null)"; then
+			# if the path doesnt correspond to its absolute path, or this doesnt exist, try prepending the working directory
+			[[ -n "$SONG_PATH" && -e "$SONG_PATH" ]] || {
+				SONG_PATH="$(mpv-get-property "$socket" 'working-directory')/${SONG_PATH}"
+			}
+			if [[ -e "$SONG_PATH" ]]; then
+				result+=("$SONG_PATH")
+			else
+				echo "Error: ${SONG_PATH} doesn't exist" >&2
+			fi
 		fi
 	fi
 done
 
 # switch on length of array (number of paths found)
-case "${#full_paths[@]}" in
+case "${#result[@]}" in
 0)
 	exit 1
-	;;
-1)
-	echo "${full_paths[0]}"
 	;;
 *)
 	(
 		IFS=$'\n'
-		echo "${full_paths[*]}"
-	) | "${1:-fzf}" || exit $?
+		echo "${result[*]}"
+	)
 	;;
 esac

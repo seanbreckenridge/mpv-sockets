@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+import sys
+from os import environ, path
+
+try:
+    from python_mpv_jsonipc import MPV
+except ImportError as ie:
+    print(f"{ie}", file=sys.stderr)
+    print("Install it with: 'pip3 install python-mpv-jsonipc'", file=sys.stderr)
+
+
+
+
+
