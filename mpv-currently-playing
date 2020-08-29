@@ -4,12 +4,11 @@
 # Can also provide an alternate command as a sink, like:
 # mpv-currently-playing cat
 #
+# However, its unlikely that multiple items are playing at the same
+# time anyways, so this will typically just return the one item
+#
 # Do mpv-currently-playing 2>/dev/null to ignore errors from mpv
 # instances which are streaming media instead of playing a local path
-#
-# By default, this all items, even if they're paused.
-# If you want to truly only list items which are currently playing,
-# set the MPV_IS_PLAYING environment variable: MPV_IS_PLAYING=1 mpv-currently-playing cat
 
 declare -a full_paths=()
 for socket in $(mpv-active-sockets); do
@@ -19,10 +18,9 @@ for socket in $(mpv-active-sockets); do
 			SONG_PATH="$(mpv-get-property "$socket" 'working-directory')/${SONG_PATH}"
 		}
 		if [[ -e "$SONG_PATH" ]]; then
-			if [[ -n "$MPV_IS_PLAYING" ]]; then
-				IS_PAUSED="$(mpv-get-property "$socket" 'pause')"
-				[[ "$IS_PAUSED" == "true" ]] && continue
-			fi
+			# ignore items that aren't playing
+			IS_PAUSED="$(mpv-get-property "$socket" 'pause')"
+			[[ "$IS_PAUSED" == "true" ]] && continue
 			full_paths+=("$SONG_PATH")
 		else
 			echo "Error: ${SONG_PATH} doesn't exist" >&2
