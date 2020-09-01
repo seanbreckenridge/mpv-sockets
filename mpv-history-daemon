@@ -264,6 +264,10 @@ class LoopHandler:
                     f"Connected refused for socket at {socket_loc}, removing dead socket file..."
                 )
                 # rm -f
+                # make sure its actually removed from active sockets
+                # gets removed from socket_data after 10 seconds
+                if socket_loc in self.sockets:
+                    self.remove_socket(socket_loc)
                 try:
                     os.remove(socket_loc)
                 except FileNotFoundError:
@@ -317,6 +321,8 @@ class LoopHandler:
             del self.sockets[socket_loc]
             # write quit event
             self.socket_data[socket_loc].nevent("mpv-quit", time())
+        else:
+            logger.warning("called remove socket, but socket_loc doesnt exist in self.sockets")
         # (doesnt remove the file here, but should find it on the next scan_sockets call and remove it then)
 
     def debug_internals(self):
