@@ -67,7 +67,8 @@ def clean_playlist(mpv_playlist_response: List[Dict]) -> List[str]:
             logger.warning(f"No filename in playlist info!: {pinfo}")
         else:
             filenames.append(pinfo["filename"])
-    return filenames
+    # truncate to 50 filenames
+    return filenames[:50]
 
 
 class SocketData:
@@ -227,9 +228,13 @@ class LoopHandler:
                         quit_callback=lambda: self.remove_socket(socket_loc),
                     )
                     self.sockets[socket_loc] = new_sock
-                    self.socket_data[socket_loc] = SocketData(
-                        new_sock, socket_loc, self.data_dir
-                    )
+                    # if the socket gets disconnected for some reason, and we're recreating MPV, *never* overwrite data
+                    if socket_loc in self.socket_data:
+                        self.socket_data[socket_loc].socket = new_sock
+                    else:
+                        self.socket_data[socket_loc] = SocketData(
+                            new_sock, socket_loc, self.data_dir
+                        )
                     self.attach_observers(socket_loc, new_sock)
             except ConnectionRefusedError:
                 logger.debug(
