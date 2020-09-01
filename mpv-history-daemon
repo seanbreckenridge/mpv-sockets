@@ -105,6 +105,20 @@ class SocketData:
         self.store_initial_metadata()
         self.store_file_metadata()
 
+    @property
+    def event_count(self):
+        return len(self.events)
+
+    _repr_attrs = ("socket", "socket_loc", "event_count")
+
+    def __repr__(self) -> str:
+        return "{}({})".format(
+            self.__class__.__name__,
+            ", ".join(["=".join([a, str(getattr(self, a))]) for a in self.__class__._repr_attrs])
+        )
+
+    __str__ = __repr__
+
     def write(self):
         with open(os.path.join(self.data_dir, f"{self.socket_time}.json"), "w") as event_f:
             json.dump(self.events, event_f)
@@ -237,6 +251,7 @@ class LoopHandler:
                             new_sock, socket_loc, self.data_dir
                         )
                     self.attach_observers(socket_loc, new_sock)
+                    self.debug_internals()
             except ConnectionRefusedError:
                 logger.debug(
                     f"Connected refused for socket at {socket_loc}, removing dead socket file..."
@@ -297,6 +312,10 @@ class LoopHandler:
             self.socket_data[socket_loc].nevent("mpv-quit", time())
         # (doesnt remove the file here, but should find it on the next scan_sockets call and remove it then)
 
+    def debug_internals(self):
+        logger.debug("sockets {}".format(self.sockets))
+        logger.debug("socket_data {}".format(self.socket_data))
+
     def periodic_write(self):
         now = time()
         for socket_loc, socket_data in self.socket_data.items():
@@ -304,6 +323,7 @@ class LoopHandler:
                 logger.debug(f"{socket_data.socket_time}|running periodic write")
                 socket_data.write()
                 socket_data.write_at = now + WRITE_PERIOD
+                self.debug_internals()
 
     def write_data(self):
         """
