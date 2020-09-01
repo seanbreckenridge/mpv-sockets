@@ -126,7 +126,7 @@ class SocketData:
     ):
         """
         Some properties arent set when the file starts?
-        sleeps for 0.05 of a second between tries (20 * 0.05 = 1 second)
+        sleeps for 0.1 of a second between tries (20 * 0.1 = 2 seconds)
 
         if create_event, once it has a non-None value, it sets the value
         with self.nevent
@@ -137,7 +137,7 @@ class SocketData:
                 if create_event:
                     self.nevent(event_name, value)
                 break
-            sleep(0.05)
+            sleep(0.1)
         else:
             logger.warning(f"{self.socket_loc} Couldn't poll for {event_name}")
 
