@@ -8,7 +8,7 @@ When launching `mpv`, one can use `--ipc-socket` (or set the property in your `m
 
 If you use the one IPC socket, whenever a new instance of `mpv` is launched, the old instance gets disconnected. The `mpv` wrapper script creates a unique IPC socket for each `mpv` instance launched at `/tmp/mpvsockets`.
 
-I run `mpv-history-daemon` in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often. See [`here`](./DAEMON.md) for more info on that.
+I run `mpv-history-daemon` in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often. See [here](./DAEMON.md) for more info on that.
 
 
 `mpv-active-sockets` removes any inactive (leftover socket files from instances which have been quit) `mpv` sockets, and lists active `mpv` sockets

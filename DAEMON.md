@@ -4,6 +4,17 @@ For each `mpv` socket, this attaches event handlers which tell me whenever a fil
 
 Later, I can reconstruct whether or not a file was paused/playing based on the events, how long `mpv` was open, and which file was playing, in addition to being able to see what file/URL I was playing.
 
+```
+Usage: mpv-history-daemon [OPTIONS] SOCKET_DIR DATA_DIR
+
+  Socket dir is the directory with mpv sockets (/tmp/mpvsockets, probably)
+  Data dir is the directory to store the history JSON files
+
+Options:
+  --log-file PATH  location of logfile
+  --help           Show this message and exit.
+```
+
 Some logs, to get an idea of what this captures:
 
 ```
