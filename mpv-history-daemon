@@ -114,13 +114,20 @@ class SocketData:
     def __repr__(self) -> str:
         return "{}({})".format(
             self.__class__.__name__,
-            ", ".join(["=".join([a, str(getattr(self, a))]) for a in self.__class__._repr_attrs])
+            ", ".join(
+                [
+                    "=".join([a, str(getattr(self, a))])
+                    for a in self.__class__._repr_attrs
+                ]
+            ),
         )
 
     __str__ = __repr__
 
     def write(self):
-        with open(os.path.join(self.data_dir, f"{self.socket_time}.json"), "w") as event_f:
+        with open(
+            os.path.join(self.data_dir, f"{self.socket_time}.json"), "w"
+        ) as event_f:
             json.dump(self.events, event_f)
 
     def nevent(self, event_name: str, event_data: Optional[Dict] = None):
