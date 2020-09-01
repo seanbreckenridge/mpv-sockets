@@ -9,7 +9,7 @@ is_active_socket() {
 	# send a command to determine if the socket
 	# is still active.
 	# If its dead, removes the socket and returns 1
-	if socat - "$1" <<<'{ "command": ["get_property", "metadata"] }' >/dev/null 2>&1; then
+	if socat - "$1" <<<'{ "command": ["get_property", "path"] }' >/dev/null 2>&1; then
 		return 0
 	else
 		rm "$1" >&2
