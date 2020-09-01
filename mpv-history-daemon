@@ -1,15 +1,318 @@
 #!/usr/bin/env python3
 
 import sys
-from os import environ, path
+import os
+import json
+from pathlib import Path
+from typing import List, Optional, Dict, Any
+from time import sleep, time
 
 try:
     from python_mpv_jsonipc import MPV
+    from logzero import logger
 except ImportError as ie:
     print(f"{ie}", file=sys.stderr)
-    print("Install it with: 'pip3 install python-mpv-jsonipc'", file=sys.stderr)
+    print(
+        "Install dependencies with: 'pip3 install python-mpv-jsonipc logzero'",
+        file=sys.stderr,
+    )
 
 
+KNOWN_EVENTS = set(
+    [
+        "mpv-launched",  # custom event, for when the socket was added
+        "mpv-quit",
+        "playlist",
+        "playlist-count",
+        "eof",
+        "seek",
+        "paused",
+        "resumed",
+        "metadata",
+        "duration",
+        "percent-pos",
+        "playlist-pos",
+        "media-title",
+        "path",
+        "working-directory",  # working-directory
+    ]
+)
 
 
+def new_event(event_name, event_data: Any = None) -> Dict[str, Any]:
+    """
+    helper to create an event. validates the event name
+    """
+    if event_name not in KNOWN_EVENTS:
+        logger.warning(f"Unknown event: {event_name}")
+    return {event_name: event_data}
 
+
+def clean_playlist(mpv_playlist_response: List[Dict]) -> List[str]:
+    """
+    simplifies the playlist response from mpv
+    from:
+        {'filename': '01 Donuts (Outro).mp3'}, {'filename': '02 Workinonit.mp3', 'current': True, 'playing': True},...
+    to:
+        ['01 Donuts (Outro).mp3', ...]
+    """
+    filenames: List[str] = []
+    for pinfo in mpv_playlist_response:
+        if "filename" not in pinfo:
+            logger.warning(f"No filename in playlist info!: {pinfo}")
+        else:
+            filenames.append(pinfo["filename"])
+    return filenames
+
+
+class SocketData:
+    """
+    Stores Metadata for a socket with timestamps in memory
+    Writes out to the JSON file when the MPV process ends
+
+    Want to save:
+        # at mpv launch:
+            # playlist
+            # playlist-count
+            # working-directory
+        # event-based
+            # whenever a socket is played/paused
+            # whenever a file changes (eof-reached) save metadata about whats being played
+                # metadata
+                # media-title
+                # path
+                # playlist-pos
+                # duration
+            # on a periodic basis (e.g. 1 min)
+                # percent-pos
+    """
+
+    # TODO: create signal handler to write out on keyboardinterrupt?
+    def __init__(self, socket: MPV, socket_loc: str):
+        self.socket = socket
+        self.socket_loc = socket_loc
+        self.events: Dict[float, Dict] = {}
+        self._previous_percent_pos = 0
+        self.store_initial_metadata()
+        self.store_file_metadata()
+
+    def nevent(self, event_name: str, event_data: Optional[Dict] = None):
+        """add an event"""
+        ct = time()
+        logger.debug(f"{self.socket_loc}|{ct}|EVENT|{event_name}|{event_data}")
+        self.events[ct] = new_event(event_name, event_data)
+
+    def store_initial_metadata(self):
+        self.nevent("mpv-launched", time())
+        self.nevent("working-directory", self.socket.working_directory)
+        self.nevent("playlist-count", self.socket.playlist_count)
+        self.nevent("playlist", clean_playlist(self.socket.playlist))
+
+    def poll_for_property(
+        self, attr: str, event_name: str, tries: int = 20, create_event: bool = True
+    ):
+        """
+        Some properties arent set when the file starts?
+        sleeps for 0.05 of a second between tries (20 * 0.05 = 1 second)
+
+        if create_event, once it has a non-None value, it sets the value
+        with self.nevent
+        """
+        for _ in range(tries):
+            value = getattr(self.socket, attr)
+            if value is not None:
+                if create_event:
+                    self.nevent(event_name, value)
+                break
+            sleep(0.05)
+        else:
+            logger.warning(f"{self.socket_loc} Couldn't poll for {event_name}")
+
+    def store_file_metadata(self):
+        """
+        Called when EOF is reached (file starts)
+        """
+
+        # poll for these incase theyre not set for some reason, because
+        # the file was just loaded by mpv
+        self.poll_for_property("playlist_pos", "playlist-pos")
+        self.poll_for_property("path", "path")
+        self.poll_for_property("media_title", "media-title")
+
+        # weird, metadata and duration arent recieved at the beginning of the file?
+        # poll for duration and metadata
+        # maybe these have to be parsed and there done a bit after the file is read
+        self.poll_for_property("metadata", "metadata")
+        self.poll_for_property("duration", "duration")
+
+    def event_resumed(self):
+        """
+        Called when the media is resumed, also save % in file
+        """
+        self.nevent("resumed", {"percent-pos": self.socket.percent_pos})
+
+    def event_paused(self):
+        """
+        Called when the media is paused, also save % in file
+        """
+        self.nevent("paused", {"percent-pos": self.socket.percent_pos})
+
+    def event_eof(self):
+        """
+        Called when the 'eof' event happens. Doesn't necessarily mean mpv exits
+        Could be going to the next song in the current playlist
+        (This doesnt happen the first time a song is loaded)
+
+        Though, this is also called when mpv exits, so we should wrap the
+        BrokenPipeError
+        """
+        self.nevent("eof")
+        try:
+            self.store_file_metadata()  # store info about new file thats playing
+        except (BrokenPipeError, OSError) as e:
+            logger.warning(f"Ignoring error: {e}")
+
+    def event_seeking(self):
+        """
+        Called when the user seeks in the file. Could possibly be called when a file is loaded as well
+        """
+        if self.socket.percent_pos < 2:
+            # logger.debug("ignoring seek becuase we just EOFd?")
+            pass
+        else:
+            # save what % we seeked to
+            self.nevent("seek", {"percent-pos": self.socket.percent_pos})
+
+
+class LoopHandler:
+    """
+    Handles keeping track of currently live mpv instances, attaching handlers,
+    the main loop.
+    """
+
+    def __init__(self, socket_dir: str, data_dir: str):
+        self.data_dir: str = data_dir
+        os.makedirs(self.data_dir, exist_ok=True)
+        self.socket_dir: str = socket_dir
+        self._socket_dir_path: Path = Path(socket_dir).expanduser().absolute()
+        self.sockets: Dict[str, MPV] = {}
+        self.socket_data: Dict[str, SocketData] = {}
+        self.run_loop()
+
+    def scan_sockets(self):
+        """
+        Look for any new sockets at socket_dir, remove any dead ones
+        """
+        for socket_name in os.listdir(self.socket_dir):
+            socket_loc: str = os.path.join(self.socket_dir, socket_name)
+            try:
+                if socket_loc not in self.sockets:
+                    # each of these runs in a separate thread, so the while loop below doesnt block event data
+                    # ConnectionRefusedError thrown here
+                    new_sock = MPV(
+                        start_mpv=False,
+                        ipc_socket=socket_loc,
+                        quit_callback=lambda: self.remove_socket(socket_loc),
+                    )
+                    self.sockets[socket_loc] = new_sock
+                    self.socket_data[socket_loc] = SocketData(new_sock, socket_loc)
+                    self.attach_observers(socket_loc, new_sock)
+            except ConnectionRefusedError:
+                logger.debug(
+                    f"Connected refused for socket at {socket_loc}, removing dead socket file..."
+                )
+                # rm -f
+                try:
+                    os.remove(socket_loc)
+                except FileNotFoundError:
+                    pass
+
+    def attach_observers(self, socket_loc: str, sock: MPV):
+        """
+        Watch for user pausing, eof-file (file ending)
+        """
+        # sanity-check
+        if hasattr(sock, "_watching_instance"):
+            logger.warning("Tried to attach observers twice!")
+            return
+        setattr(sock, "_watching_instance", None)
+
+        socket_data: SocketData = self.socket_data[socket_loc]
+
+        # keep track of when last EOF was. EOF also happens when
+        # a file is loaded, and seeking happens when you load a file,
+        # (since its sort of seeking to the beginning)
+        # doesnt seem to be deterministic/easy to filter seeks out
+        # by EOFs, and might match actual seeking. so, will have
+        # to do larger anaylsis on the dumped data to figure out
+        # if EOF next to seek, remove the seek
+
+        @sock.property_observer("pause")
+        def on_pause(_name, value):
+            if value:  # item is now paused
+                socket_data.event_paused()
+            else:
+                socket_data.event_resumed()
+
+        @sock.property_observer("eof-reached")
+        def on_eof(_name, value):
+            # means that eof has not been reached
+            if isinstance(value, bool) and not value:
+                return
+            if value is not None:
+                logger.warning(
+                    "Seems that this is supposed to be None; just to signify event? not sure why it isnt"
+                )
+            socket_data.event_eof()
+
+        @sock.property_observer("seeking")
+        def on_seek(_name, value):
+            if isinstance(value, bool) and value:
+                socket_data.event_seeking()
+
+    def remove_socket(self, socket_loc: str):
+        if socket_loc in self.sockets:
+            del self.sockets[socket_loc]
+            # write quit event
+            self.socket_data[socket_loc].nevent("mpv-quit", time())
+        # (doesnt remove the file here, but should find it on the next scan_sockets call and remove it then)
+
+    def write_data(self):
+        """
+        Write out any completed SocketData to disk
+        """
+        # if the /tmp/mpvSockets/ file is no longer in self.sockets
+        # but we have socketdata for it from when it was alive, in
+        # self.socket_data, write that out to data_dir
+        #
+        # runs in the main thread, errors crash main thread
+        for socket_loc in list(self.socket_data):
+            if socket_loc not in self.sockets:
+                logger.info(f"{socket_loc}: writing to file...")
+                time_part: str = socket_loc.split("/")[-1]
+                with open(os.path.join(str(self.data_dir), time_part), "w") as event_f:
+                    json.dump(self.socket_data[socket_loc].events, event_f)
+                del self.socket_data[socket_loc]
+
+    def run_loop(self):
+        while True:
+            self.scan_sockets()
+            self.write_data()
+            logger.debug(self.sockets)
+            logger.debug(self.socket_data)
+            # TODO: watch for new files instead?
+            sleep(10)
+
+
+def main():
+    # TODO: add logfile
+    # TODO: argparser
+    socket_dir = "/tmp/mpvsockets"
+    data_dir = "/tmp/mpvdata"
+    assert os.path.isdir(socket_dir)
+    assert os.path.isdir(data_dir)
+    LoopHandler(socket_dir, data_dir)
+
+
+if __name__ == "__main__":
+    main()
