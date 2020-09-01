@@ -106,7 +106,7 @@ class SocketData:
         self.store_file_metadata()
 
     def write(self):
-        with open(os.path.join(self.data_dir, self.socket_time), "w") as event_f:
+        with open(os.path.join(self.data_dir, f"{self.socket_time}.json"), "w") as event_f:
             json.dump(self.events, event_f)
 
     def nevent(self, event_name: str, event_data: Optional[Dict] = None):
