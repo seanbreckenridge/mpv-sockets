@@ -22,7 +22,7 @@ except ImportError as ie:
 
 KNOWN_EVENTS = set(
     [
-        "mpv-launched",  # custom event, for when the socket was added
+        "socket-added",  # custom event, for when the socket was added
         "mpv-quit",
         "playlist",
         "playlist-count",
@@ -116,7 +116,7 @@ class SocketData:
         self.events[ct] = new_event(event_name, event_data)
 
     def store_initial_metadata(self):
-        self.nevent("mpv-launched", time())
+        self.nevent("socket-added", time())
         self.nevent("working-directory", self.socket.working_directory)
         self.nevent("playlist-count", self.socket.playlist_count)
         self.nevent("playlist", clean_playlist(self.socket.playlist))
