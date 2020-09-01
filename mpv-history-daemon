@@ -92,7 +92,6 @@ class SocketData:
         self.socket = socket
         self.socket_loc = socket_loc
         self.events: Dict[float, Dict] = {}
-        self._previous_percent_pos = 0
         self.store_initial_metadata()
         self.store_file_metadata()
 
