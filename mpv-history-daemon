@@ -182,8 +182,10 @@ class SocketData:
         self.nevent("eof")
         try:
             self.store_file_metadata()  # store info about new file thats playing
-        except (BrokenPipeError, OSError) as e:
+        # possible errors thrown: BrokenPipeError, OSError
+        except Exception as e:
             logger.warning(f"Ignoring error: {e}")
+            logger.exception(e)
 
     def event_seeking(self):
         """
