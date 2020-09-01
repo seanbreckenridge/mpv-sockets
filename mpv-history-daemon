@@ -205,7 +205,6 @@ class LoopHandler:
 
     def __init__(self, socket_dir: str, data_dir: str):
         self.data_dir: str = data_dir
-        os.makedirs(self.data_dir, exist_ok=True)
         self.socket_dir: str = socket_dir
         self._socket_dir_path: Path = Path(socket_dir).expanduser().absolute()
         self.sockets: Dict[str, MPV] = {}
@@ -343,6 +342,7 @@ def main(socket_dir, data_dir, log_file):
     Data dir is the directory to store the history JSON files
     """
     assert os.path.isdir(socket_dir)
+    os.makedirs(data_dir, exist_ok=True)
     assert os.path.isdir(data_dir)
     logfile(log_file, maxBytes=1e7, backupCount=1)
     LoopHandler(socket_dir, data_dir)
