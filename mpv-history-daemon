@@ -339,6 +339,7 @@ class LoopHandler:
                 logger.info(f"{socket_loc}: writing to file...")
                 self.socket_data[socket_loc].write()
                 del self.socket_data[socket_loc]
+                self.debug_internals()
 
     def run_loop(self):
         while True:
