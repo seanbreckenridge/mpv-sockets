@@ -8,14 +8,16 @@ from typing import List, Optional, Dict, Any
 from time import sleep, time
 
 try:
+    import click
     from python_mpv_jsonipc import MPV
-    from logzero import logger
+    from logzero import logger, logfile
 except ImportError as ie:
     print(f"{ie}", file=sys.stderr)
     print(
-        "Install dependencies with: 'pip3 install python-mpv-jsonipc logzero'",
+        "Install dependencies with: 'pip3 install click python-mpv-jsonipc logzero'",
         file=sys.stderr,
     )
+    sys.exit(1)
 
 
 KNOWN_EVENTS = set(
@@ -34,9 +36,12 @@ KNOWN_EVENTS = set(
         "playlist-pos",
         "media-title",
         "path",
-        "working-directory",  # working-directory
+        "working-directory",
     ]
 )
+
+# every 10 minutes
+WRITE_PERIOD = 600
 
 
 def new_event(event_name, event_data: Any = None) -> Dict[str, Any]:
@@ -88,17 +93,25 @@ class SocketData:
     """
 
     # TODO: create signal handler to write out on keyboardinterrupt?
-    def __init__(self, socket: MPV, socket_loc: str):
+    def __init__(self, socket: MPV, socket_loc: str, data_dir: str):
         self.socket = socket
         self.socket_loc = socket_loc
+        self.data_dir = data_dir
+        self.socket_time = socket_loc.split("/")[-1]
         self.events: Dict[float, Dict] = {}
+        # write every 10 minutes, even if mpv doesnt exit
+        self.write_at = time() + WRITE_PERIOD
         self.store_initial_metadata()
         self.store_file_metadata()
+
+    def write(self):
+        with open(os.path.join(self.data_dir, self.socket_time), "w") as event_f:
+            json.dump(self.events, event_f)
 
     def nevent(self, event_name: str, event_data: Optional[Dict] = None):
         """add an event"""
         ct = time()
-        logger.debug(f"{self.socket_loc}|{ct}|EVENT|{event_name}|{event_data}")
+        logger.debug(f"{self.socket_time}|{ct}|{event_name}|{event_data}")
         self.events[ct] = new_event(event_name, event_data)
 
     def store_initial_metadata(self):
@@ -163,7 +176,7 @@ class SocketData:
         (This doesnt happen the first time a song is loaded)
 
         Though, this is also called when mpv exits, so we should wrap the
-        BrokenPipeError
+        possible socket errors
         """
         self.nevent("eof")
         try:
@@ -214,7 +227,9 @@ class LoopHandler:
                         quit_callback=lambda: self.remove_socket(socket_loc),
                     )
                     self.sockets[socket_loc] = new_sock
-                    self.socket_data[socket_loc] = SocketData(new_sock, socket_loc)
+                    self.socket_data[socket_loc] = SocketData(
+                        new_sock, socket_loc, self.data_dir
+                    )
                     self.attach_observers(socket_loc, new_sock)
             except ConnectionRefusedError:
                 logger.debug(
@@ -255,7 +270,7 @@ class LoopHandler:
 
         @sock.property_observer("eof-reached")
         def on_eof(_name, value):
-            # means that eof has not been reached
+            # value == False means that eof has not been reached
             if isinstance(value, bool) and not value:
                 return
             if value is not None:
@@ -276,11 +291,19 @@ class LoopHandler:
             self.socket_data[socket_loc].nevent("mpv-quit", time())
         # (doesnt remove the file here, but should find it on the next scan_sockets call and remove it then)
 
+    def periodic_write(self):
+        now = time()
+        for socket_loc, socket_data in self.socket_data.items():
+            if now > socket_data.write_at:
+                logger.debug(f"{socket_data.socket_time}|running periodic write")
+                socket_data.write()
+                socket_data.write_at = now + WRITE_PERIOD
+
     def write_data(self):
         """
         Write out any completed SocketData to disk
         """
-        # if the /tmp/mpvSockets/ file is no longer in self.sockets
+        # if the /tmp/mpvsockets/ file is no longer in self.sockets
         # but we have socketdata for it from when it was alive, in
         # self.socket_data, write that out to data_dir
         #
@@ -288,28 +311,35 @@ class LoopHandler:
         for socket_loc in list(self.socket_data):
             if socket_loc not in self.sockets:
                 logger.info(f"{socket_loc}: writing to file...")
-                time_part: str = socket_loc.split("/")[-1]
-                with open(os.path.join(str(self.data_dir), time_part), "w") as event_f:
-                    json.dump(self.socket_data[socket_loc].events, event_f)
+                self.socket_data[socket_loc].write()
                 del self.socket_data[socket_loc]
 
     def run_loop(self):
         while True:
             self.scan_sockets()
+            self.periodic_write()
             self.write_data()
-            logger.debug(self.sockets)
-            logger.debug(self.socket_data)
-            # TODO: watch for new files instead?
             sleep(10)
+            # TODO: watch for new files instead?
 
 
-def main():
-    # TODO: add logfile
-    # TODO: argparser
-    socket_dir = "/tmp/mpvsockets"
-    data_dir = "/tmp/mpvdata"
+@click.command()
+@click.argument("SOCKET_DIR")
+@click.argument("DATA_DIR")
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default="/tmp/mpv-history-daemon.log",
+    help="location of logfile",
+)
+def main(socket_dir, data_dir, log_file):
+    """
+    Socket dir is the directory with mpv sockets (/tmp/mpvsockets, probably)
+    Data dir is the directory to store the history JSON files
+    """
     assert os.path.isdir(socket_dir)
     assert os.path.isdir(data_dir)
+    logfile(log_file, maxBytes=1e7, backupCount=1)
     LoopHandler(socket_dir, data_dir)
 
 
