@@ -50,6 +50,7 @@ KNOWN_EVENTS = set(
         "media-title",
         "path",
         "working-directory",
+        "final-write",  # custom event, for when the dead/dangling socket was removed, and file was written
     ]
 )
 
@@ -115,6 +116,18 @@ class SocketData:
         self.events: Dict[float, Dict] = {}
         # write every 10 minutes, even if mpv doesnt exit
         self.write_at = time() + WRITE_PERIOD
+        # keep track of playlist/playlist-count, so we can use eof to determine
+        # whether we should read next metadata
+        self.playlist_count = self.socket.playlist_count
+        playlist_pos = self.socket.playlist_pos
+        # incremented at the top of in store_file_metadata
+        # technically this is zero-indexed, but have to deal with off-by-one errors
+        # becuase I cant read the playlist position of a dead socket, counting manually
+        if playlist_pos is None:
+            logger.warning("Couldn't get playlist position in SocketData initialization, defaulting to 0")
+            self.playlist_index = 0
+        else:
+            self.playlist_index = playlist_pos
         self.store_initial_metadata()
         self.store_file_metadata()
 
@@ -170,19 +183,29 @@ class SocketData:
             if value is not None:
                 if create_event:
                     self.nevent(event_name, value)
-                break
+                return value
             sleep(0.1)
         else:
             logger.warning(f"{self.socket_loc} Couldn't poll for {event_name}")
 
     def store_file_metadata(self):
         """
-        Called when EOF is reached (file starts)
+        Called when EOF is reached (so, another file starts)
         """
+
+        self.playlist_index += 1
+        # (is zero indexed, but incrementing before making any requests out to the socket)
+        if self.playlist_index - 1 >= self.playlist_count:
+            logger.debug("Reached end of playlist, not reading in next file info...")
+            return
 
         # poll for these incase theyre not set for some reason, because
         # the file was just loaded by mpv
-        self.poll_for_property("playlist_pos", "playlist-pos")
+        actual_playlist_pos = self.poll_for_property("playlist_pos", "playlist-pos")
+        # make sure internal, manually counted playlist index is accurate
+        if actual_playlist_pos is not None:
+            if actual_playlist_pos + 1 != self.playlist_index:
+                self.playlist_index = actual_playlist_pos + 1
         self.poll_for_property("path", "path")
         self.poll_for_property("media_title", "media-title")
 
@@ -219,7 +242,8 @@ class SocketData:
         # possible errors thrown: BrokenPipeError, OSError
         except Exception as e:
             logger.warning(f"Ignoring error: {e}")
-            logger.exception(e)
+            if not isinstance(e, ConnectionRefusedError):
+                logger.exception(e)
 
     def event_seeking(self):
         """
@@ -286,11 +310,11 @@ class LoopHandler:
                 # try to access path to possibly cause ConnectionRefusedError,
                 # removing a dead socket
                 sock_obj.path
-        except ConnectionRefusedError as conn:
+        except (ConnectionRefusedError, BrokenPipeError) as conn:
             logger.debug(
                 f"Connected refused for socket at {socket_loc}, removing dead/dangling socket file..."
             )
-            logger.exception(conn)
+            # logger.exception(conn)
             # make sure its actually removed from active sockets
             # gets removed from socket_data after 10 seconds
             if socket_loc in self.sockets:
@@ -381,6 +405,7 @@ class LoopHandler:
         for socket_loc in list(self.socket_data):
             if socket_loc not in self.sockets:
                 logger.info(f"{socket_loc}: writing to file...")
+                self.socket_data[socket_loc].nevent("final-write", time())
                 self.socket_data[socket_loc].write()
                 del self.socket_data[socket_loc]
                 self.debug_internals()
