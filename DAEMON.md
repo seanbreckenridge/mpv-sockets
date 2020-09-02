@@ -87,4 +87,10 @@ The corresponding JSON file looks like:
 
 More events would keep getting logged, as I pause/play, or the file ends and a new file starts. The key for each JSON value is the epoch time, so everything is timestamped.
 
-I plan to create a data abstraction layer to load in all these JSON files, as part of my [`HPI`](https://github.com/seanbreckenridge/HPI).
+I parse the stream of events with some code [here](https://github.com/seanbreckenridge/HPI/blob/master/my/media/playback.py); which lets me access it through a REPL/through `my.media.playback`. For example, to find my most played song:
+
+```
+>>> import my.media.playback, collections
+>>> collections.Counter([e.path for e in list(my.media.playback.history())]).most_common(1)
+[('/home/data/media/music/Janelle Monáe/The_Electric_Lady/15-Victory.mp3', 8)]
+```
