@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
 
+# This probably isn't optmized/the minimum amount of code to do this
+# Dealing with sockets/EOFs/random drops is a pain, so this stays on the safe side
+# of validating to make sure sockets arent left dangling or data isn't
+# saved, because of a ConnectionRefusedError/BrokenPipe/general OSErrors
+#
+# logzero logs all the exceptions, incase theyre not what I expect
+# most of the times, mpv will be open for more than 10 minutes, so
+# the WRITE_PERIOD periodically writes will at least capture what was
+# being listened to, even if *somehow* (is not common case)
+# I lose data on what happened
+# when mpv EOFd/disconnected due to a BrokenPipe.
+# BrokenPipes are captured in the event_eof function
+
 import sys
 import os
 import json
@@ -238,9 +251,11 @@ class LoopHandler:
         """
         Look for any new sockets at socket_dir, remove any dead ones
         """
-        for socket_name in os.listdir(self.socket_dir):
-            socket_loc: str = os.path.join(self.socket_dir, socket_name)
-            try:
+        socket_loc: str = None
+        try:
+            # iterate through all files
+            for socket_name in os.listdir(self.socket_dir):
+                socket_loc: str = os.path.join(self.socket_dir, socket_name)
                 if socket_loc not in self.sockets:
                     # each of these runs in a separate thread, so the while loop below doesnt block event data
                     # ConnectionRefusedError thrown here
@@ -259,19 +274,32 @@ class LoopHandler:
                         )
                     self.attach_observers(socket_loc, new_sock)
                     self.debug_internals()
-            except ConnectionRefusedError:
-                logger.debug(
-                    f"Connected refused for socket at {socket_loc}, removing dead socket file..."
-                )
-                # rm -f
-                # make sure its actually removed from active sockets
-                # gets removed from socket_data after 10 seconds
-                if socket_loc in self.sockets:
-                    self.remove_socket(socket_loc)
-                try:
-                    os.remove(socket_loc)
-                except FileNotFoundError:
-                    pass
+                else:  # if this socket is already connected, just try to get the path from the scoket
+                    # may have been a TimeoutError: No response from MPV.
+                    # which resulted in the socket remaning in self.sockets, even if its eof'd and exited
+                    self.sockets[socket_loc].path
+            # iterate through sockets, if file doesnt exist for some reason
+            # this is probably unneccessary
+            for s_loc, sock_obj in self.sockets.items():
+                # update higher scope to allow usage in except block
+                socket_loc = s_loc
+                # try to access path to possibly cause ConnectionRefusedError,
+                # removing a dead socket
+                sock_obj.path
+        except ConnectionRefusedError as conn:
+            logger.debug(
+                f"Connected refused for socket at {socket_loc}, removing dead/dangling socket file..."
+            )
+            logger.exception(conn)
+            # make sure its actually removed from active sockets
+            # gets removed from socket_data after 10 seconds
+            if socket_loc in self.sockets:
+                self.remove_socket(socket_loc)
+            # rm -f
+            try:
+                os.remove(socket_loc)
+            except FileNotFoundError:
+                pass
 
     def attach_observers(self, socket_loc: str, sock: MPV):
         """
@@ -318,11 +346,14 @@ class LoopHandler:
 
     def remove_socket(self, socket_loc: str):
         if socket_loc in self.sockets:
+            logger.debug(f"Removing socket {socket_loc}")
             del self.sockets[socket_loc]
             # write quit event
             self.socket_data[socket_loc].nevent("mpv-quit", time())
         else:
-            logger.warning("called remove socket, but socket_loc doesnt exist in self.sockets")
+            logger.warning(
+                "called remove socket, but socket_loc doesnt exist in self.sockets"
+            )
         # (doesnt remove the file here, but should find it on the next scan_sockets call and remove it then)
 
     def debug_internals(self):
@@ -355,6 +386,7 @@ class LoopHandler:
                 self.debug_internals()
 
     def run_loop(self):
+        logger.debug("Starting mpv-history-daemon loop...")
         while True:
             self.scan_sockets()
             self.periodic_write()
