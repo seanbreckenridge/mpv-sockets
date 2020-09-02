@@ -440,6 +440,7 @@ def main(socket_dir, data_dir, log_file):
     os.makedirs(data_dir, exist_ok=True)
     assert os.path.isdir(data_dir)
     logfile(log_file, maxBytes=1e7, backupCount=1)
+    # TODO: wrap LoopHandler in an infinite loop, notify-send fatal errors?
     LoopHandler(socket_dir, data_dir)
 
 
