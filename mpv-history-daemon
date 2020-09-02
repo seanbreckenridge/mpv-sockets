@@ -45,7 +45,6 @@ KNOWN_EVENTS = set(
         "resumed",
         "metadata",
         "duration",
-        "percent-pos",
         "playlist-pos",
         "media-title",
         "path",
