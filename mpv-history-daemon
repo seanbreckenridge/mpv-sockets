@@ -121,7 +121,7 @@ class SocketData:
         playlist_pos = self.socket.playlist_pos
         # incremented at the top of in store_file_metadata
         # technically this is zero-indexed, but have to deal with off-by-one errors
-        # becuase I cant read the playlist position of a dead socket, counting manually
+        # because I cant read the playlist position of a dead socket, counting manually
         if playlist_pos is None:
             logger.warning(
                 "Couldn't get playlist position in SocketData initialization, defaulting to 0"
@@ -210,7 +210,7 @@ class SocketData:
         self.poll_for_property("path", "path")
         self.poll_for_property("media_title", "media-title")
 
-        # weird, metadata and duration arent recieved at the beginning of the file?
+        # weird, metadata and duration arent received at the beginning of the file?
         # poll for duration and metadata
         # maybe these have to be parsed and there done a bit after the file is read
         self.poll_for_property("metadata", "metadata")
@@ -251,7 +251,7 @@ class SocketData:
         Called when the user seeks in the file. Could possibly be called when a file is loaded as well
         """
         if self.socket.percent_pos < 2:
-            # logger.debug("ignoring seek becuase we just EOFd?")
+            # logger.debug("ignoring seek because we just EOFd?")
             pass
         else:
             # save what % we seeked to
@@ -304,7 +304,7 @@ class LoopHandler:
                     # which resulted in the socket remaning in self.sockets, even if its eof'd and exited
                     self.sockets[socket_loc].path
             # iterate through sockets, if file doesnt exist for some reason
-            # this is probably unneccessary
+            # this is probably unnecessary
             for s_loc, sock_obj in self.sockets.items():
                 # update higher scope to allow usage in except block
                 socket_loc = s_loc
@@ -343,7 +343,7 @@ class LoopHandler:
         # (since its sort of seeking to the beginning)
         # doesnt seem to be deterministic/easy to filter seeks out
         # by EOFs, and might match actual seeking. so, will have
-        # to do larger anaylsis on the dumped data to figure out
+        # to do larger analysis on the dumped data to figure out
         # if EOF next to seek, remove the seek
 
         @sock.property_observer("pause")
