@@ -37,7 +37,6 @@ KNOWN_EVENTS = set(
     [
         "socket-added",  # custom event, for when the socket was added
         "mpv-quit",
-        "playlist",
         "playlist-count",
         "eof",
         "seek",
@@ -66,6 +65,7 @@ def new_event(event_name, event_data: Any = None) -> Dict[str, Any]:
     return {event_name: event_data}
 
 
+# disabled for now
 def clean_playlist(mpv_playlist_response: List[Dict]) -> List[str]:
     """
     simplifies the playlist response from mpv
@@ -167,7 +167,7 @@ class SocketData:
         self.nevent("socket-added", time())
         self.nevent("working-directory", self.socket.working_directory)
         self.nevent("playlist-count", self.socket.playlist_count)
-        self.nevent("playlist", clean_playlist(self.socket.playlist))
+        # self.nevent("playlist", clean_playlist(self.socket.playlist))
 
     def poll_for_property(
         self, attr: str, event_name: str, tries: int = 20, create_event: bool = True
