@@ -19,7 +19,7 @@ To illustrate:
 
 If I have two instances of `mpv` open:
 
-```
+```bash
 $ mpv-active-sockets
 /tmp/mpvsockets/1596170714
 /tmp/mpvsockets/1596170180
@@ -27,7 +27,7 @@ $ mpv-active-sockets
 
 To get metadata from the oldest (sockets are named based on epoch time, so `head` gets the oldest) launched `mpv` instance:
 
-```
+```bash
 $ mpv-communicate "$(mpv-active-sockets | head -n 1)" '{ "command": ["get_property", "metadata"] }' | jq
 {
   "data": {
@@ -47,7 +47,7 @@ $ mpv-communicate "$(mpv-active-sockets | head -n 1)" '{ "command": ["get_proper
 
 `mpv-get-property` interpolates the second argument into the `get_property` `command` syntax, but is practically no different from `mpv-communicate`
 
-```
+```bash
 $ mpv-get-property "$(mpv-active-sockets)" path  # this works if theres only one instance of mpv active
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
@@ -66,7 +66,7 @@ I use this to monitor all `mpv` instances running, so I can run a task in the ba
 
 To install this, clone and copy all the scripts somewhere onto you `$PATH`:
 
-```
+```bash
 git clone https://gitlab.com/seanbreckenridge/mpv-sockets
 cd mpv-sockets
 cp ./mpv* ~/.local/bin
