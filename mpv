@@ -17,9 +17,11 @@ readonly mpv_path socket_dir
 }
 
 # make sockets directory
-mkdir -p "${socket_dir}" || exit $?
+[[ ! -d "${socket_dir}" ]] && {
+	mkdir -p "${socket_dir}" || exit $?
+}
 
-# exec mpv, with the --input-ipc-server flag, using epoch time
+# exec mpv, with the --input-ipc-server flag, using epoch nanoseconds
 # to guarantee unique ipc sockets
 declare -a mpv_options
 mpv_options=(--input-ipc-server="${socket_dir}/$(date +%s%N)")
