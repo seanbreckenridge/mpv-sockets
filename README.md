@@ -68,11 +68,10 @@ I use this to monitor all `mpv` instances running, so I can run a task in the ba
 
 ## Install
 
-To install this, clone and copy all the scripts somewhere onto you `$PATH`:
+To install this, clone and copy all the scripts somewhere onto your `$PATH`:
 
 ```bash
-git clone https://gitlab.com/seanbreckenridge/mpv-sockets
-cd mpv-sockets
+git clone https://gitlab.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
 cp ./mpv* ~/.local/bin
 ```
 
