@@ -435,6 +435,9 @@ def main(socket_dir, data_dir, log_file):
     Socket dir is the directory with mpv sockets (/tmp/mpvsockets, probably)
     Data dir is the directory to store the history JSON files
     """
+    # if the daemon launched before any mpv instances
+    if not os.path.exists(socket_dir):
+        os.makedirs(socket_dir)
     assert os.path.isdir(socket_dir)
     os.makedirs(data_dir, exist_ok=True)
     assert os.path.isdir(data_dir)
