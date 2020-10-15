@@ -1,0 +1,14 @@
+#!/bin/bash
+
+IFS=$'\n'
+declare -a playing
+
+# use first argument as number of seconds to skip; default to 5 seconds forwards
+SEEK_SECONDS="${1:-5}"
+
+if playing=($(mpv-currently-playing --socket)); then
+	exec mpv-communicate "${playing[-1]}" "$(printf '{ "command": ["seek", "%d"] }' "$SEEK_SECONDS")"
+else
+	echo "No mpv instances which are currently playing media..." >&2
+	exit 1
+fi
