@@ -75,7 +75,7 @@ git clone https://gitlab.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
 cp ./mpv* ~/.local/bin
 ```
 
-This also includes a `Makefile` which does the above, `make all` installs the `python` dependencies for `mpv-history-daemon`.
+This also includes a `Makefile` which does the above - you can run `make` in the git directory after cloning; `make all` installs the `python` dependencies for `mpv-history-daemon`
 
 I put the `mpv` wrapper script on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. You could alternatively rename the `mpv` wrapper script to something else.
 
