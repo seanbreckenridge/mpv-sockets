@@ -6,20 +6,13 @@ socket_dir='/tmp/mpvsockets'
 mpv_path="${MPV_PATH:-/usr/bin/mpv}"
 readonly mpv_path socket_dir
 
-[[ ! -r "$mpv_path" ]] && {
-	printf 'error: could not read file at %s\n' "$mpv_path" >&2
+[[ ! -e "$mpv_path" ]] && {
+	printf 'Error: could not find mpv at "%s"\nSet the MPV_PATH environment variable to the absolute path of mpv\n' "$mpv_path" >&2
 	exit 1
 }
 
-# if user passed nothing, print mpv --help
-[[ -z "$1" ]] && {
-	exec "$mpv_path" "$@"
-}
-
 # make sockets directory
-[[ ! -d "${socket_dir}" ]] && {
-	mkdir -p "${socket_dir}" || exit $?
-}
+mkdir -p "${socket_dir}" || exit $?
 
 # exec mpv, with the --input-ipc-server flag, using epoch nanoseconds
 # to guarantee unique ipc sockets
