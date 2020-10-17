@@ -1,6 +1,6 @@
 #!/bin/bash
 # launches mpv with a unique mpv socket at /tmp/mpvsockets
-# https://github.com/seanbreckenridge/sock-mpv
+# https://github.com/seanbreckenridge/mpv-sockets
 
 socket_dir='/tmp/mpvsockets'
 mpv_path="${MPV_PATH:-/usr/bin/mpv}"
