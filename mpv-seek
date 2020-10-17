@@ -1,4 +1,5 @@
 #!/bin/bash
+# seek forward/backward in the current song
 
 IFS=$'\n'
 declare -a playing

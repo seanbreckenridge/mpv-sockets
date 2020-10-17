@@ -1,4 +1,6 @@
 #!/bin/bash
+# set the currently playing percentage for this song to 100,
+# which makes mpv play the next
 
 IFS=$'\n'
 declare -a playing
