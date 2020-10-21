@@ -72,12 +72,22 @@ To install this, clone and copy all the scripts somewhere onto your `$PATH`:
 
 ```bash
 git clone https://gitlab.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
-cp ./mpv* ~/.local/bin
+make
 ```
 
-This also includes a `Makefile` which does the above - you can run `make` in the git directory after cloning; `make all` installs the `python` dependencies for `mpv-history-daemon`
+Running `make all` installs the `python` dependencies for `mpv-history-daemon`
 
-I put the `mpv` wrapper script on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. You could alternatively rename the `mpv` wrapper script to something else.
+I put the `mpv` wrapper script on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. In my shell profile, like:
 
-You can set the `MPV_PATH` variable to the absolute path of `mpv` if the `mpv` executable isn't installed at `/usr/bin/mpv`,  e.g.: `MPV_PATH=/usr/local/bin/mpv mpv` (the second `mpv` is the script, not `/usr/local/bin/mpv`)
+```
+PATH="\
+${HOME}/.local/bin:\
+... (other bin directories)
+${PATH}"
+export PATH
+```
+
+You could alternatively rename the `mpv` wrapper script to something else.
+
+The `MPV_PATH` variable can be set to the absolute path of `mpv` if the `mpv` executable isn't installed at `/usr/bin/mpv`,  e.g.: `MPV_PATH=/usr/local/bin/mpv mpv` (the second `mpv` is the script in this repo, not `/usr/local/bin/mpv`)
 
