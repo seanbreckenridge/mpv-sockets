@@ -64,8 +64,6 @@ To quit the currently playing mpv instance:
 
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
-I use this to monitor all `mpv` instances running, so I can run a task in the background to capture what I'm currently watching/listening to with `mpv`, to generate history/most-played statistics for my local media.
-
 ## Install
 
 To install this, clone and copy all the scripts somewhere onto your `$PATH`:
