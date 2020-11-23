@@ -24,6 +24,10 @@ while [[ -n "$1" ]]; do
 done
 readonly PRINT_SOCKET
 
+# change directory to root, so when we try to compute the absolute path,
+# it doesn't fail since the playing file is the current directory
+cd /
+
 declare -a result=()
 for socket in $(mpv-active-sockets); do
 
