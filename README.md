@@ -2,7 +2,7 @@
 
 Dependencies: `mpv`, `socat`, `jq`.
 
-A collection of scripts to allow flexible and easier interaction with `mpv` sockets.
+A collection of bash scripts to allow easier and programattic interaction with `mpv` sockets
 
 When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the *one* socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening to, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
 
