@@ -1,5 +1,6 @@
 #!/bin/bash -u
-# pick one of the active mpv instances, and quit send it a 'quit' command
+# interactively pick one of the active mpv instances,
+# and send it a 'quit' command
 
 abort() {
 	echo "$1" 1>&2
