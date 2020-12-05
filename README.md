@@ -51,13 +51,19 @@ Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 
 `mpv-currently-playing` is a `mpv-get-property` wrapper that gets information about the currently playing mpv instance. If there are multiple sockets, prints multiple lines, with one for each socket.
 
-By default that will print the full path of the song thats currently playing, but you can provide the `--socket` flag to print the sockets instead. Thats used in `mpv-play-pause`, which keeps track of which sockets were recently paused. If that socket can be resumed, it does that; else, tries to look for another paused mpv instance. Can also be used with `mpv-communicate` to go to the next song:
+By default that will print the full path of the song thats currently playing, but you can provide the `--socket` flag to print the sockets instead. Thats used in `mpv-play-pause`, which toggles the currently playing mpv instance to paused/resumes it. It keeps track of which sockets were recently paused - if a socket can be resumed, it does that; else, tries to look for another paused mpv instance.
+
+`mpv-currently-playing` can also be used with `mpv-communicate` to go to the next song, by setting the `percent-pos` to `100` (end of a song)
 
 `mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["set_property", "percent-pos", 100 ] }'`
+
+`mpv-seek` is another `mpv-currently-playing` wrapper, which moves forward/backward in the currently playing instance
 
 To quit the currently playing mpv instance:
 
 `$ mpv-communicate $(mpv-currently-playing --socket | tail -n1) 'quit'`
+
+I bind some of these scripts to keybindings, so I can easily play/pause and skip songs without switching to the terminal with `mpv` running; search for 'mpv' in my [config file](https://sean.fish/d/i3/config)
 
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
