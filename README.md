@@ -1,6 +1,6 @@
 # mpv-sockets
 
-Dependencies: `mpv`, `socat`, `jq`, (`fzf` for mpv-quit-pick)
+Dependencies: [`mpv`](https://mpv.io/), [`socat`](https://github.com/craSH/socat), [`jq`](https://github.com/stedolan/jq), ([`fzf`](https://github.com/junegunn/fzf) for mpv-quit-pick)
 
 A collection of bash scripts to allow easier and programmatic interaction with `mpv` sockets
 
