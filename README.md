@@ -4,7 +4,7 @@ Dependencies: `mpv`, `socat`, `jq`, (`fzf` for mpv-quit-pick)
 
 A collection of bash scripts to allow easier and programmatic interaction with `mpv` sockets
 
-When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the *one* socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening to, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
+When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the _one_ socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening to, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
 
 If you use the one IPC socket, whenever a new instance of `mpv` is launched, the old instance gets disconnected. The `mpv` wrapper script creates a unique IPC socket for each `mpv` instance launched at `/tmp/mpvsockets`.
 
@@ -90,11 +90,10 @@ export PATH
 
 You could alternatively rename the `mpv` wrapper script to something else.
 
-The `MPV_PATH` variable can be set to the absolute path of `mpv` if the `mpv` executable isn't installed at `/usr/bin/mpv`,  e.g.: `MPV_PATH=/usr/local/bin/mpv mpv` (the second `mpv` is the script in this repo, not `/usr/local/bin/mpv`)
+The `MPV_PATH` variable can be set to the absolute path of `mpv` if the `mpv` executable isn't installed at `/usr/bin/mpv`, e.g.: `MPV_PATH=/usr/local/bin/mpv mpv` (the second `mpv` is the script in this repo, not `/usr/local/bin/mpv`)
 
 ---
 
 ## Daemon
 
 I run `mpv-history-daemon` in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often. See [here](./DAEMON.md) for more info on that.
-
