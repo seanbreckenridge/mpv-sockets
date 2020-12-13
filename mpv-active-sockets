@@ -26,7 +26,7 @@ while read -r -d $'\0' socket; do
 	fi
 done < <(find "${SOCKET_DIR}" -type s -print0)
 
-((${#active_sockets[@]}==0)) && exit 1
+((${#active_sockets[@]} == 0)) && exit 1
 {
 	for socket in "${active_sockets[@]}"; do
 		echo "${socket}"
