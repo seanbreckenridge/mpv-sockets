@@ -5,6 +5,7 @@
 IFS=$'\n'
 declare -a playing
 
+# shellcheck disable=SC2207
 if playing=($(mpv-currently-playing --socket)); then
 	exec mpv-communicate "${playing[-1]}" '{ "command": ["set_property", "percent-pos", 100 ] }'
 else

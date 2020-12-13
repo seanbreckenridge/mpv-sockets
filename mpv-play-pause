@@ -16,6 +16,7 @@ toggle() {
 
 IFS=$'\n'
 # if something is playing, stop it and link it to /tmp/mpv-recently-paused
+# shellcheck disable=SC2207
 if currently_playing=($(mpv-currently-playing --socket)); then
 	rm -f "${last_playing}"
 	# get the most recently launched currently playing mpv instance

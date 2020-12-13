@@ -7,6 +7,7 @@ declare -a playing
 # use first argument as number of seconds to skip; default to 5 seconds forwards
 SEEK_SECONDS="${1:-5}"
 
+# shellcheck disable=SC2207
 if playing=($(mpv-currently-playing --socket)); then
 	exec mpv-communicate "${playing[-1]}" "$(printf '{ "command": ["seek", "%d"] }' "$SEEK_SECONDS")"
 else
