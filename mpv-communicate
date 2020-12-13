@@ -4,8 +4,8 @@
 # all other arguments are sent to the socket using socat
 
 SOCKET="${1:?Must provide socket as first argument}"
-if [[ -e "$SOCKET" ]]; then
-	if [[ ! -S "$SOCKET" ]]; then
+if [[ -e "${SOCKET}" ]]; then
+	if [[ ! -S "${SOCKET}" ]]; then
 		echo "Path is not a socket: ${SOCKET}" >&2
 		exit 2
 	fi

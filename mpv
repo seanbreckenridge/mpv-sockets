@@ -6,8 +6,8 @@ socket_dir='/tmp/mpvsockets'
 mpv_path="${MPV_PATH:-/usr/bin/mpv}"
 readonly mpv_path socket_dir
 
-[[ ! -e "$mpv_path" ]] && {
-	printf 'Error: could not find mpv at "%s"\nSet the MPV_PATH environment variable to the absolute path of mpv\n' "$mpv_path" >&2
+[[ ! -e "${mpv_path}" ]] && {
+	printf 'Error: could not find mpv at "%s"\nSet the MPV_PATH environment variable to the absolute path of mpv\n' "${mpv_path}" >&2
 	exit 1
 }
 
@@ -20,4 +20,4 @@ declare -a mpv_options
 mpv_options=(--input-ipc-server="${socket_dir}/$(date +%s%N)")
 mpv_options+=("$@")
 
-exec "$mpv_path" "${mpv_options[@]}"
+exec "${mpv_path}" "${mpv_options[@]}"

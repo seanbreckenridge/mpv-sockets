@@ -32,19 +32,19 @@ declare -a result=()
 for socket in $(mpv-active-sockets); do
 
 	# ignore items that aren't playing
-	IS_PAUSED="$(mpv-get-property "$socket" 'pause')"
-	[[ "$IS_PAUSED" == "true" ]] && continue
+	IS_PAUSED="$(mpv-get-property "${socket}" 'pause')"
+	[[ "${IS_PAUSED}" == "true" ]] && continue
 
-	if [[ -n "$PRINT_SOCKET" ]]; then # if user asked for socket, just print the socket
-		result+=("$socket")
+	if [[ -n "${PRINT_SOCKET}" ]]; then # if user asked for socket, just print the socket
+		result+=("${socket}")
 	else # else, try to get the full song path
-		if SONG_PATH="$(mpv-get-property "$socket" 'path' 2>/dev/null)"; then
+		if SONG_PATH="$(mpv-get-property "${socket}" 'path' 2>/dev/null)"; then
 			# if the path doesnt correspond to its absolute path, or this doesnt exist, try prepending the working directory
-			[[ -n "$SONG_PATH" && -e "$SONG_PATH" ]] || {
-				SONG_PATH="$(mpv-get-property "$socket" 'working-directory')/${SONG_PATH}"
+			[[ -n "${SONG_PATH}" && -e "${SONG_PATH}" ]] || {
+				SONG_PATH="$(mpv-get-property "${socket}" 'working-directory')/${SONG_PATH}"
 			}
-			if [[ -e "$SONG_PATH" ]]; then
-				result+=("$SONG_PATH")
+			if [[ -e "${SONG_PATH}" ]]; then
+				result+=("${SONG_PATH}")
 			else
 				echo "Error: ${SONG_PATH} doesn't exist" >&2
 			fi

@@ -12,7 +12,7 @@ is_active_socket() {
 	if socat - "$1" <<<'{ "command": ["get_property", "path"] }' >/dev/null 2>&1; then
 		return 0
 	else
-		rm "$1" 1>&2
+		rm "$1" >&2
 		return 1
 	fi
 }
@@ -21,8 +21,8 @@ is_active_socket() {
 declare -a active_sockets
 active_sockets=()
 while read -r -d $'\0' socket; do
-	if is_active_socket "$socket"; then
-		active_sockets+=("$socket")
+	if is_active_socket "${socket}"; then
+		active_sockets+=("${socket}")
 	fi
 done < <(find "${SOCKET_DIR}" -type s -print0)
 

@@ -3,7 +3,7 @@
 # and send it a 'quit' command
 
 abort() {
-	echo "$1" 1>&2
+	echo "$1" >&2
 	exit 1
 }
 
@@ -13,15 +13,15 @@ declare chosen
 if active=($(mpv-active-sockets)); then
 	chosen="$({
 		for socket in "${active[@]}"; do
-			printf "%s:" "$socket"
-			mpv-get-property "$socket" 'path' || exit $?
+			printf '%s:' "${socket}"
+			mpv-get-property "${socket}" 'path' || exit $?
 		done
-	} | fzf +m -i --prompt="Select mpv instance to quit > ")" || abort "No instance selected..."
+	} | fzf +m -i --prompt='Select mpv instance to quit > ')" || abort 'No instance selected...'
 	if [[ -n "${chosen}" ]]; then
 		exec mpv-communicate "${chosen%%:*}" 'quit'
 	else
-		abort "Error getting selected instance..."
+		abort 'Error getting selected instance...'
 	fi
 else
-	abort "No active mpv instances..."
+	abort 'No active mpv instances...'
 fi
