@@ -1,0 +1,12 @@
+#!/bin/bash
+# quit the currently playing mpv instance
+
+IFS=$'\n'
+
+# shellcheck disable=SC2207
+if playing=($(mpv-currently-playing --socket)); then
+	exec mpv-communicate "${playing[-1]}" 'quit'
+else
+	echo "No mpv instances which are currently playing media..." >&2
+	exit 1
+fi
