@@ -72,7 +72,7 @@ There are lots of properties/commands one can send to `mpv`, see `mpv --list-pro
 To install this, clone and copy all the scripts somewhere onto your `$PATH`:
 
 ```bash
-git clone https://gitlab.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
+git clone https://github.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
 make
 ```
 
