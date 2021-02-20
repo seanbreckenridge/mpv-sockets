@@ -10,5 +10,5 @@ copy_scripts:
 	cp -v ./mpv $(TARGET_BIN)
 
 daemon:
-	pip install click python-mpv-jsonipc logzero
+	python3 -m pip install --user click python-mpv-jsonipc logzero
 
