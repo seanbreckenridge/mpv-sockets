@@ -94,3 +94,6 @@ I parse the stream of events with some code [here](https://github.com/seanbrecke
 >>> collections.Counter([e.path for e in list(my.mpv())]).most_common(1)
 [('/home/data/media/music/Janelle Monáe/The_Electric_Lady/15-Victory.mp3', 8)]
 ```
+
+For whatever reason, this stops working after a few days of continuous use, so I wrap this with another script which restarts this every so often; [`mpv_history_daemon_watcher`](./mpv_history_daemon_watcher)
+
