@@ -2,14 +2,36 @@
 # launches mpv with a unique mpv socket at /tmp/mpvsockets
 # https://github.com/seanbreckenridge/mpv-sockets
 
-socket_dir='/tmp/mpvsockets'
-mpv_path="${MPV_PATH:-/usr/bin/mpv}"
-readonly mpv_path socket_dir
+declare socket_dir mpv_loc
+declare -a mpv_possible_paths mpv_options
 
-[[ ! -e "${mpv_path}" ]] && {
-	printf 'Error: could not find mpv at "%s"\nSet the MPV_PATH environment variable to the absolute path of mpv\n' "${mpv_path}" >&2
+socket_dir='/tmp/mpvsockets'
+
+mpv_possible_paths=()
+[[ -n "${MPV_PATH}" ]] && mpv_possible_paths+=("${MPV_PATH}")
+# fallbacks if MPV_PATH wasn't set
+mpv_possible_paths+=('/usr/bin/mpv' '/bin/mpv' '/usr/local/bin/mpv')
+
+# try common paths to find the mpv binary
+for pos in "${mpv_possible_paths[@]}"; do
+	if [[ -e "${pos}" ]]; then
+		mpv_loc="${pos}"
+		break
+	fi
+done
+
+[[ -z "${mpv_loc}" ]] && {
+	# if mpv_loc isn't set here, none of the fallbacks worked. If the user
+	# set the MPV_PATH variable, we should warn them that no binary exists there
+	if [[ -n "${MPV_PATH}" ]]; then
+		printf 'Error: could not find mpv at "%s"\n' "${MPV_PATH}" >&2
+	fi
+	echo 'Set the MPV_PATH environment variable to the absolute path of mpv' >&2
 	exit 1
 }
+
+# done with configuration
+readonly mpv_loc socket_dir
 
 # make sockets directory
 mkdir -p "${socket_dir}" || exit $?
@@ -20,4 +42,4 @@ declare -a mpv_options
 mpv_options=(--input-ipc-server="${socket_dir}/$(date +%s%N)")
 mpv_options+=("$@")
 
-exec "${mpv_path}" "${mpv_options[@]}"
+exec "${mpv_loc}" "${mpv_options[@]}"

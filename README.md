@@ -90,7 +90,7 @@ export PATH
 
 You could alternatively rename the `mpv` wrapper script to something else.
 
-The `MPV_PATH` variable can be set to the absolute path of `mpv` if the `mpv` executable isn't installed at `/usr/bin/mpv`, e.g.: `MPV_PATH=/usr/local/bin/mpv mpv` (the second `mpv` is the script in this repo, not `/usr/local/bin/mpv`)
+If this fails to find the `mpv` binary, The `MPV_PATH` environment variable can be set to the absolute path of `mpv`. By default, this checks `/usr/bin/mpv`, `/bin/mpv` and `/usr/local/bin/mpv`.
 
 ---
 
