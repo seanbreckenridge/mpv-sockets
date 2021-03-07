@@ -26,6 +26,7 @@ done
 	if [[ -n "${MPV_PATH}" ]]; then
 		printf 'Error: could not find mpv at "%s"\n' "${MPV_PATH}" >&2
 	fi
+	echo 'Could not find the mpv binary at common locations' >&2
 	echo 'Set the MPV_PATH environment variable to the absolute path of mpv' >&2
 	exit 1
 }
