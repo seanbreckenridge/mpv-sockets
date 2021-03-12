@@ -76,8 +76,6 @@ git clone https://github.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
 make
 ```
 
-Running `make all` installs the `python` dependencies for `mpv-history-daemon`
-
 I put the `mpv` wrapper script on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. In my shell profile, like:
 
 ```
@@ -96,4 +94,4 @@ If this fails to find the `mpv` binary, The `MPV_PATH` environment variable can 
 
 ## Daemon
 
-I run `mpv-history-daemon` in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often. See [here](./DAEMON.md) for more info on that.
+I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often.
