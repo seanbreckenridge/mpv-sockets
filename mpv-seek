@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # seek forward/backward in the current song
 
 IFS=$'\n'

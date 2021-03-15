@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Removes any inactive mpv sockets, lists active mpv sockets
 # Exits unsuccessfully if no sockets are active
 

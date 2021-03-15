@@ -1,6 +1,8 @@
-#!/bin/bash -u
+#!/usr/bin/env bash
 # interactively pick one of the active mpv instances
 # print the socket file path
+
+set -e
 
 abort() {
 	echo "$1" >&2

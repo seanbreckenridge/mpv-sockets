@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # mpv-get-property wrapper that gets full path of currently playing song
 # If there are multiple instances of mpv playing at the same time,
 # prints both

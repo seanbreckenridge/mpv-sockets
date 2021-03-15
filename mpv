@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # launches mpv with a unique mpv socket at /tmp/mpvsockets
 # https://github.com/seanbreckenridge/mpv-sockets
 

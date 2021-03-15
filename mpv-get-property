@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Sends commands to an mpv socket using socat
 # First argument: mpv socket
 # all other arguments are sent to the socket using socat

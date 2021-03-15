@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # quit the currently playing mpv instance
 
 IFS=$'\n'
