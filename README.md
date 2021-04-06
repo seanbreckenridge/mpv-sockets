@@ -53,9 +53,9 @@ Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 
 By default that will print the full path of the song thats currently playing, but you can provide the `--socket` flag to print the sockets instead. Thats used in `mpv-play-pause`, which toggles the currently playing mpv instance to paused/resumes it. It keeps track of which sockets were recently paused - if a socket can be resumed, it does that; else, tries to look for another paused mpv instance.
 
-`mpv-currently-playing` can also be used with `mpv-communicate` to go to the next song, by setting the `percent-pos` to `100` (end of a song)
+`mpv-currently-playing` can also be used with `mpv-communicate` to go to the next song, by sending the `playlist-next` command:
 
-`mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["set_property", "percent-pos", 100 ] }'`
+`mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["playlist-next"] }'`
 
 `mpv-seek` is another `mpv-currently-playing` wrapper, which moves forward/backward in the currently playing instance
 

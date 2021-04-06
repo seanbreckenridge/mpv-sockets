@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# set the currently playing percentage for this song to 100,
-# which makes mpv play the next
+# go to the next song in the playlist for the currently playing mpv instance
 
 IFS=$'\n'
 declare -a playing
 
 # shellcheck disable=SC2207
 if playing=($(mpv-currently-playing --socket)); then
-	exec mpv-communicate "${playing[-1]}" '{ "command": ["set_property", "percent-pos", 100 ] }'
+	exec mpv-communicate "${playing[-1]}" '{ "command": ["playlist-next"] }'
 else
 	echo 'No mpv instances which are currently playing media...' >&2
 	exit 1
