@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sends commands to an mpv socket using socat
 # First argument: mpv socket
-# all other arguments are sent to the socket using socat
+# Second argument: mpv property to get from the socket
 
 SOCKET="${1:?Must provide socket as first argument}"
 if [[ -e "${SOCKET}" ]]; then
