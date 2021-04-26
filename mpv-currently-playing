@@ -5,9 +5,6 @@
 #
 # Can provide the --socket flag to instead print the socket of the
 # current mpv instance
-#
-# Do mpv-currently-playing 2>/dev/null to ignore errors from mpv
-# instances which are streaming media instead of playing a local path
 
 declare PRINT_SOCKET=''
 while [[ -n "$1" ]]; do
