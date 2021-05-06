@@ -5,12 +5,19 @@
 #
 # Can provide the --socket flag to instead print the socket of the
 # current mpv instance
+#
+# Pass the --all flag to print the path for all items, regardless
+# of whether or not they're playing currently
 
 declare PRINT_SOCKET=''
+declare ALLOW_PAUSED=''
 while [[ -n "$1" ]]; do
 	case "$1" in
 	--socket)
 		PRINT_SOCKET='1'
+		;;
+	--all)
+		ALLOW_PAUSED='1'
 		;;
 	*)
 		printf 'Unknown option passed: %s\n' "$1" >&2
@@ -28,9 +35,12 @@ cd /
 declare -a result=()
 for socket in $(mpv-active-sockets); do
 
-	# ignore items that aren't playing
-	IS_PAUSED="$(mpv-get-property "${socket}" 'pause')"
-	[[ "${IS_PAUSED}" == "true" ]] && continue
+	# if the user didn't specify the --all flag
+	if ! ((ALLOW_PAUSED)); then
+		# ignore items that aren't playing
+		IS_PAUSED="$(mpv-get-property "${socket}" 'pause')"
+		[[ "${IS_PAUSED}" == "true" ]] && continue
+	fi
 
 	if [[ -n "${PRINT_SOCKET}" ]]; then # if user asked for socket, just print the socket
 		result+=("${socket}")
