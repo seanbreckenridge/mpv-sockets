@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # launches mpv with a unique mpv socket at /tmp/mpvsockets
+# can set the MPV_SOCKET_DIR environment variable to override the location
 # https://github.com/seanbreckenridge/mpv-sockets
 
 declare socket_dir mpv_loc
 declare -a mpv_possible_paths mpv_options
 
-socket_dir='/tmp/mpvsockets'
+socket_dir="${MPV_SOCKET_DIR:-/tmp/mpvsockets}"
 
 mpv_possible_paths=()
 [[ -n "${MPV_PATH}" ]] && mpv_possible_paths+=("${MPV_PATH}")

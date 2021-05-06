@@ -94,6 +94,8 @@ You could alternatively rename the `mpv` wrapper script to something else.
 
 If this fails to find the `mpv` binary, The `MPV_PATH` environment variable can be set to the absolute path of `mpv`. By default, this checks `/usr/bin/mpv`, `/bin/mpv` and `/usr/local/bin/mpv`.
 
+You can set the `MPV_SOCKET_DIR` environment variable to spawn sockets in a directory other than `/tmp/mpvsockets`
+
 ## Daemon
 
 I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which communicates with the sockets at `/tmp/mpvsockets`, to get fileinfo, metadata, and whenever I play/pause/skip anything playing in mpv. That lets me create a history and do statistics on which songs/videos I listen to often.
