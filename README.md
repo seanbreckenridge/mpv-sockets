@@ -80,7 +80,9 @@ git clone https://github.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
 make
 ```
 
-I put the `mpv` wrapper script on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. In my shell profile, like:
+That puts them in `~/.local/bin`
+
+I put the directory that the `mpv` wrapper script is installed into on my `$PATH` before `/usr/bin`, so the wrapper script intercepts calls that would typically call the `mpv` binary. In my shell profile, like:
 
 ```
 PATH="\
