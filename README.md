@@ -67,7 +67,7 @@ To list currently paused mpv instances:
 
 `$ diff -y --suppress-common-lines <(mpv-currently-playing --socket) <(mpv-active-sockets) | grep -oP '(\/tmp\/mpvsockets\/\d+)'`
 
-I bind some of these scripts to keybindings, so I can easily play/pause and skip songs without switching to the terminal with `mpv` running; search for 'mpv' in my [config file](https://sean.fish/d/i3/config)
+I bind some of these scripts to keybindings, so I can easily play/pause and skip songs without switching to the terminal with `mpv` running; search for 'mpv' in my [config file](https://sean.fish/d/i3/config?dark)
 
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
