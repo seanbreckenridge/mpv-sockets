@@ -26,7 +26,7 @@ while [[ -n "$1" ]]; do
 	esac
 	shift
 done
-readonly PRINT_SOCKET
+readonly PRINT_SOCKET ALLOW_PAUSED
 
 # change directory to root, so when we try to compute the absolute path,
 # it doesn't fail since the playing file is the current directory
