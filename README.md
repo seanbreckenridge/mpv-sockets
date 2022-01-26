@@ -101,7 +101,7 @@ You can set the `MPV_SOCKET_DIR` environment variable to spawn sockets in a dire
 
 ## Daemon
 
-I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which polls for new sockets `/tmp/mpvsockets`, to get file info, metadata, and whenever I play/pause/skip anything playing in `mpv`. That creates a local scrobbling history for `mpv` - letting me create a `mpv` history, and do statistics on which songs/videos I listen to often.
+I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which polls for new sockets at `/tmp/mpvsockets`, grabbing file info, metadata, and whenever I play/pause/skip anything playing in `mpv`. That creates a local scrobbling history for `mpv` - letting me create a `mpv` history, and do statistics on which songs/videos I listen to often.
 
 ```
 1598956534118491075|1598957274.3349547|mpv-launched|1598957274.334953
