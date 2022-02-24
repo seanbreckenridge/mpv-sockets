@@ -76,7 +76,8 @@ There are lots of properties/commands one can send to `mpv`, see `mpv --list-pro
 To install this, clone and copy all the scripts somewhere onto your `$PATH`:
 
 ```bash
-git clone https://github.com/seanbreckenridge/mpv-sockets && cd ./mpv-sockets
+git clone https://github.com/seanbreckenridge/mpv-sockets
+cd ./mpv-sockets
 make
 ```
 
@@ -99,7 +100,23 @@ export MPV_PATH=/home/user/bin/mpv
 
 You can set the `MPV_SOCKET_DIR` environment variable to spawn sockets in a directory other than `/tmp/mpvsockets`
 
-## Daemon
+### Alternative Installation Methods
+
+To automate the manual `git clone`/`cd`/`make`, you could instead use [`bpkg`](https://github.com/bpkg/bpkg):
+
+```
+bpkg install -g seanbreckenridge/mpv-sockets
+```
+
+Or [`basher`](https://github.com/basherpm/basher):
+
+```
+basher install seanbreckenridge/mpv-sockets
+```
+
+Note that in this case the basher `bin` has to appear before the `mpv` binary, see [my config](https://github.com/seanbreckenridge/dotfiles/blob/50fdef99d8e5343181cc68abe1a9fc0f941a0cad/.profile#L59-L60) as an example
+
+### Daemon
 
 I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which polls for new sockets at `/tmp/mpvsockets`, grabbing file info, metadata, and whenever I play/pause/skip anything playing in `mpv`. That creates a local scrobbling history for `mpv` - letting me create a `mpv` history, and do statistics on which songs/videos I listen to often.
 
