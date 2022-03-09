@@ -1,7 +1,5 @@
 # mpv-sockets
 
-Dependencies: [`mpv`](https://mpv.io/), [`socat`](https://linux.die.net/man/1/socat), [`jq`](https://github.com/stedolan/jq), ([`fzf`](https://github.com/junegunn/fzf) for `mpv-quit-pick`)
-
 A collection of bash scripts to allow easier and programmatic interaction with `mpv` sockets
 
 When launching `mpv`, one can use `--ipc-socket` (or set the property in your `mpv.conf`) to launch `mpv` with the _one_ socket, but I tend to have lots of instances of `mpv` open. One for a video I'm watching, another for some album I'm listening to, another for a [playlist](https://github.com/seanbreckenridge/plaintext-playlist)...
@@ -91,6 +89,8 @@ I bind lots of these scripts to keybindings, so I can easily play/pause and skip
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
 ## Install
+
+Dependencies: [`mpv`](https://mpv.io/), [`socat`](https://linux.die.net/man/1/socat), [`jq`](https://github.com/stedolan/jq), `sed`, ([`fzf`](https://github.com/junegunn/fzf) for `mpv-quit-pick`)
 
 To install this, clone and copy all the scripts somewhere onto your `$PATH`:
 
