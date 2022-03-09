@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# print a description of the song, like
+# title - artist (album)
+#
+# this uses the 'title', 'artist' and 'album' metadata keys
+# as set by MPV, it handles parsing data from ID3 / metadata
+#
+# if the MPV_DESC_RAW environment variable is set, prints the raw JSON metadata
+# if MPV_DESC_SKIP_ALBUM is set, doesn't include the album
+#
+# Exits unsuccessfully if nothing is playing or it couldn't find
+# any of the expected keys on the parsed metadata
+
+set -o pipefail
+
+IFS=$'\n'
+
+declare -a playing
+
+if ! playing=($(mpv-currently-playing --socket)); then
+	echo 'No mpv instances which are currently playing media...' >&2
+	exit 1
+fi
+
+# reset IFS -- acts as normal
+# https://unix.stackexchange.com/questions/26784/understanding-ifs
+unset IFS
+
+declare metadata
+
+metadata="$(mpv-get-property "${playing[-1]}" 'metadata')"
+[[ -n "$MPV_DESC_RAW" ]] && {
+	printf '%s\n' "${metadata}"
+	exit 0
+}
+
+declare TITLE ARTIST ALBUM DESCRIPTION
+
+fetch_attr_or_empty() {
+	# jq the key out default to empty space, remove newlines and spaces from end of field
+	jq --arg FIELD "$1" '.[$FIELD]//""' -r <<<"${metadata}" | sed -e 's/\n/ /g; s/\s*$//g'
+}
+
+TITLE="$(fetch_attr_or_empty title)"
+ARTIST="$(fetch_attr_or_empty artist)"
+ALBUM="$(fetch_attr_or_empty album)"
+
+DESCRIPTION=''
+[[ -n "$TITLE" ]] && DESCRIPTION="${TITLE}"
+[[ -n "$ARTIST" ]] && DESCRIPTION="${DESCRIPTION} - ${ARTIST}"
+[[ -n "$ALBUM" && -z "${MPV_DESC_SKIP_ALBUM}" ]] && DESCRIPTION="${DESCRIPTION} (${ALBUM})"
+
+if [[ -z "${DESCRIPTION}" ]]; then
+	echo 'No data extracted from metadata' 1>&2
+	exit 1
+fi
+
+printf '%s\n' "${DESCRIPTION}"

@@ -49,6 +49,13 @@ $ mpv-get-property "$(mpv-active-sockets)" path  # this works if there's only on
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
 
+Can also use `mpv-get-property` to construct a description from the `metadata`, like `mpv-song-description` does:
+
+```bash
+$ mpv-song-description
+Yellow Submarine - The Beatles (Revolver)
+```
+
 `mpv-currently-playing` is a `mpv-get-property` wrapper that gets information about the currently playing mpv instance. If there are multiple sockets, prints multiple lines, with one for each socket.
 
 By default that will print the full path of the song that's currently playing, but you can provide the `--socket` flag to print the sockets instead. That's used in `mpv-play-pause`, which toggles the currently playing `mpv` instance to paused/resumes it. It keeps track of which sockets were recently paused - if a socket can be resumed, it does that; else, tries to look for another paused `mpv` instance.
