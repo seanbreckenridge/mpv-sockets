@@ -43,7 +43,7 @@ fetch_attr_or_empty() {
 
 TITLE="$(fetch_attr_or_empty title)"
 ARTIST="$(fetch_attr_or_empty artist)"
-ALBUM="$(fetch_attr_or_empty album)"
+[[ -z "$MPV_DESC_SKIP_ALBUM" ]] && ALBUM="$(fetch_attr_or_empty album)"
 
 DESCRIPTION=''
 [[ -n "$TITLE" ]] && DESCRIPTION="${TITLE}"
