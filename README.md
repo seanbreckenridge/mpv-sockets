@@ -49,32 +49,44 @@ $ mpv-get-property "$(mpv-active-sockets)" path  # this works if there's only on
 Music/Yes/Yes - Fragile/01 - Roundabout.mp3
 ```
 
-Can also use `mpv-get-property` to construct a description from the `metadata`, like `mpv-song-description` does:
+### `mpv-currently-playing`
+
+`mpv-currently-playing` is a `mpv-get-property` wrapper that gets information about the currently playing mpv instance. If there are multiple sockets, prints multiple lines, with one for each socket.
+
+By default that will print the full path of the song that's currently playing, but you can provide the `--socket` flag to print the sockets instead.
+
+Lots of scripts here use `mpv-currently-playing` internally, as interacting with the currently playing `mpv` instance is pretty useful.
+
+- `mpv-play-pause`: toggles the currently playing `mpv` between playing/paused. It keeps track of which sockets were recently paused - if a socket can be resumed, it does that; else, tries to look for another paused `mpv` instance to resume.
+
+- `mpv-song-description`: constructs a description from the `metadata`:
 
 ```bash
 $ mpv-song-description
 Yellow Submarine - The Beatles (Revolver)
 ```
 
-`mpv-currently-playing` is a `mpv-get-property` wrapper that gets information about the currently playing mpv instance. If there are multiple sockets, prints multiple lines, with one for each socket.
+- `mpv-next-song`: goes to the next song, by sending the `playlist-next` command:
 
-By default that will print the full path of the song that's currently playing, but you can provide the `--socket` flag to print the sockets instead. That's used in `mpv-play-pause`, which toggles the currently playing `mpv` instance to paused/resumes it. It keeps track of which sockets were recently paused - if a socket can be resumed, it does that; else, tries to look for another paused `mpv` instance.
+```bash
+mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["playlist-next"] }'
+```
 
-`mpv-currently-playing` can also be used with `mpv-communicate` to go to the next song, by sending the `playlist-next` command:
+- `mpv-seek`: moves forward/backward a few seconds in the currently playing media
 
-`mpv-communicate $(mpv-currently-playing --socket | tail -n1) '{ "command": ["playlist-next"] }'`
+- `mpv-quit-latest`: quit the currently playing `mpv` instance:
 
-`mpv-seek` is another `mpv-currently-playing` wrapper, which moves forward/backward in the currently playing instance
-
-To quit the currently playing `mpv` instance:
-
-`$ mpv-communicate $(mpv-currently-playing --socket | tail -n1) 'quit'`
+```
+mpv-communicate $(mpv-currently-playing --socket | tail -n1) 'quit'
+```
 
 To list currently paused `mpv` instances:
 
 `$ diff -y --suppress-common-lines <(mpv-currently-playing --socket) <(mpv-active-sockets) | grep -oP '(\/tmp\/mpvsockets\/\d+)'`
 
-I bind some of these scripts to keybindings, so I can easily play/pause and skip songs without switching to the terminal with `mpv` running; search for `mpv` in my [config file](https://sean.fish/d/i3/config?dark)
+---
+
+I bind lots of these scripts to keybindings, so I can easily play/pause and skip songs without switching to the terminal with `mpv` running; search for `mpv` in my [config file](https://sean.fish/d/i3/config?dark)
 
 There are lots of properties/commands one can send to `mpv`, see `mpv --list-properties` and these ([1](https://stackoverflow.com/q/35013075/9348376), [2](https://stackoverflow.com/q/62582594/9348376)) for reference.
 
@@ -121,7 +133,7 @@ Or [`basher`](https://github.com/basherpm/basher):
 basher install seanbreckenridge/mpv-sockets
 ```
 
-Note that in this case the basher `bin` has to appear before the `mpv` binary, see [my config](https://github.com/seanbreckenridge/dotfiles/blob/50fdef99d8e5343181cc68abe1a9fc0f941a0cad/.profile#L59-L60) as an example
+Note that in this case the basher `bin` has to appear before the `mpv` binary, see [my config](https://github.com/seanbreckenridge/dotfiles/blob/50fdef99d8e5343181cc68abe1a9fc0f941a0cad/.profile#L59-L60) as an example (I install basher in `$XDG_DATA_HOME`, by default it places itself in `~/.basher`)
 
 ### Daemon
 
