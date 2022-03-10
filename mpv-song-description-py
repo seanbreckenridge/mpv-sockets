@@ -1,39 +1,41 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 # same as mpv-song-description, uses python to speedup the string/json manipulation
-
-# use other script to grab metdata
-declare metadata
-metadata="$(MPV_DESC_RAW=1 mpv-song-description)"
-export metadata
-
 # is faster to do this in python,
 # otherwise need to do lots of jq/string manipulation
 # is about 25-30% faster
-python3 -c "
+
 import os
+import sys
 import json
+import subprocess
 
-print_album = 'MPV_DESC_SKIP_ALBUM' not in os.environ
+os.environ["MPV_DESC_RAW"] = "1"
 
-data = json.loads(os.environ['metadata'])
+proc = subprocess.run("mpv-song-description", stdout=subprocess.PIPE)
+if proc.returncode != 0:
+    sys.exit(proc.returncode)
 
-title = data.get('title', '').replace(os.linesep, '').strip()
-artist = data.get('artist', '').replace(os.linesep, '').strip()
-album = ''
+print_album = "MPV_DESC_SKIP_ALBUM" not in os.environ
 
-desc = ''
+data = json.loads(proc.stdout.decode("utf-8"))
+
+title = data.get("title", "").replace(os.linesep, "").strip()
+artist = data.get("artist", "").replace(os.linesep, "").strip()
+album = ""
+
+desc = ""
 if print_album:
-	album = data.get('album', '').replace(os.linesep, '').strip()
+    album = data.get("album", "").replace(os.linesep, "").strip()
 
 if title:
-	desc = title
+    desc = title
 if artist:
-	if desc:
-		desc = f'{desc} - {artist}'
-	else:
-		desc = artist
+    if desc:
+        desc = f"{desc} - {artist}"
+    else:
+        desc = artist
 
 if album:
-	desc = f'{desc} ({album})'
+    desc = f"{desc} ({album})"
 
-print(desc)"
+print(desc)
