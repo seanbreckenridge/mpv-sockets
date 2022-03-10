@@ -17,10 +17,18 @@ PROPERTY="${2:?Must provide property as second argument}"
 readonly SOCKET PROPERTY
 
 # interpolate the property and capture the response
-MPV_RESP="$(socat - "${SOCKET}" <<<"$(printf '{ "command": ["get_property", "%s" ] }' "${PROPERTY}")")"
-err="$(echo "${MPV_RESP}" | jq -r '.error')"
-[[ "${err}" == "success" ]] || {
-	echo "Error: ${err}" >&2
-	exit 1
-}
-echo "${MPV_RESP}" | jq -r '.data'
+MPV_RESP="$(printf '{ "command": ["get_property", "%s" ] }\n' "${PROPERTY}" | socat - "${SOCKET}")"
+
+# to reduce overhead from multiple jq calls -- try the common case first
+# filter and extract data from success if it worked
+DATA="$(jq -r 'select(.error == "success") | .data' <<<"$MPV_RESP")"
+if [[ -z "$DATA" ]]; then
+	# was empty, so extract error
+	err="$(echo "${MPV_RESP}" | jq -r '.error')"
+	if [[ "err" != "success" ]]; then
+		echo "Error: ${err}" >&2
+		exit 1
+	fi
+fi
+# data wasn't empty; succeeded
+echo "${DATA}"
