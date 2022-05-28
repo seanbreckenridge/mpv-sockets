@@ -44,7 +44,9 @@ for socket in $(mpv-active-sockets); do
 
 	if [[ -n "${PRINT_SOCKET}" ]]; then # if user asked for socket, just print the socket
 		result+=("${socket}")
-	else # else, try to get the full song path
+	else
+		# else, try to get the full song path
+		FULL_SONG_PATH='' # reset full song path var
 		if REL_SONG_PATH="$(mpv-get-property "${socket}" 'path' 2>/dev/null)"; then
 			# if the path doesnt correspond to its absolute path, or this doesnt exist, try prepending the working directory
 			[[ -n "${REL_SONG_PATH}" && -e "${REL_SONG_PATH}" ]] || {
