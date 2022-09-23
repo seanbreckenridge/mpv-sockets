@@ -19,8 +19,10 @@ print_album = "MPV_DESC_SKIP_ALBUM" not in os.environ
 
 data = json.loads(proc.stdout.decode("utf-8"))
 
+
 def fetch(key: str):
     return data.get(key, "").replace(os.linesep, "").strip()
+
 
 title = fetch("title")
 artist = fetch("artist")
