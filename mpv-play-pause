@@ -6,7 +6,7 @@
 # else, tries to look for another paused
 # mpv instance and resumes that
 
-readonly last_playing='/tmp/mpv-recently-paused'
+readonly last_playing="${TMPDIR:-/tmp}/mpv-recently-paused"
 declare -a currently_playing all_sockets
 
 toggle() {

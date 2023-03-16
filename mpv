@@ -3,10 +3,13 @@
 # can set the MPV_SOCKET_DIR environment variable to override the location
 # https://github.com/seanbreckenridge/mpv-sockets
 
-declare socket_dir mpv_loc
+declare socket_dir mpv_loc default_tmp_dir default_socket_dir
 declare -a mpv_possible_paths mpv_options
 
-socket_dir="${MPV_SOCKET_DIR:-/tmp/mpvsockets}"
+default_tmp_dir="${TMPDIR:-/tmp}"
+default_socket_dir="${default_tmp_dir}/mpvsockets"
+
+socket_dir="${MPV_SOCKET_DIR:-${default_socket_dir}}"
 
 mpv_possible_paths=()
 [[ -n "${MPV_PATH}" ]] && mpv_possible_paths+=("${MPV_PATH}")

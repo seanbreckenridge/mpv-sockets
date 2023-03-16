@@ -117,7 +117,7 @@ This checks `/usr/bin/mpv`, `/bin/mpv` and `/usr/local/bin/mpv` for the `mpv` bi
 export MPV_PATH=/home/user/bin/mpv
 ```
 
-You can set the `MPV_SOCKET_DIR` environment variable to spawn sockets in a directory other than `/tmp/mpvsockets`
+You can set the `MPV_SOCKET_DIR` environment variable to spawn sockets in a directory other than `/tmp/mpvsockets`, this uses the `TMPDIR` environment variable if it's set instead of `/tmp`
 
 ### Alternative Installation Methods
 

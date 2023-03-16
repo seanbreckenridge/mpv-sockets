@@ -2,7 +2,11 @@
 # Removes any inactive mpv sockets, lists active mpv sockets
 # Exits unsuccessfully if no sockets are active
 
-readonly SOCKET_DIR="${MPV_SOCKET_DIR:-/tmp/mpvsockets}"
+declare default_tmp_dir default_socket_dir
+default_tmp_dir="${TMPDIR:-/tmp}"
+default_socket_dir="${default_tmp_dir}/mpvsockets"
+
+readonly SOCKET_DIR="${MPV_SOCKET_DIR:-${default_socket_dir}}"
 
 # remove any mpv sockets which fail to respond to a basic command
 is_active_socket() {
