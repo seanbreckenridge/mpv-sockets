@@ -21,7 +21,7 @@ is_active_socket() {
 	fi
 }
 
-# find all active sockets, remove any that arent active
+# find all active sockets, remove any that aren't active
 declare -a active_sockets
 active_sockets=()
 while read -r -d $'\0' socket; do
