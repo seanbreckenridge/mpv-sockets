@@ -137,7 +137,7 @@ Note that in this case the basher `bin` has to appear before the `mpv` binary, s
 
 ### Daemon
 
-I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which polls for new sockets at `/tmp/mpvsockets`, grabbing file info, metadata, and whenever I play/pause/skip anything playing in `mpv`. That creates a local scrobbling history for `mpv` - letting me create a `mpv` history, and do statistics on which songs/videos I listen to often.
+I run [`mpv-history-daemon`](https://github.com/seanbreckenridge/mpv-history-daemon) in the background, which polls for new sockets at `/tmp/mpvsockets`, grabbing file info, metadata, and whenever I play/pause/skip anything playing in `mpv`. That creates a local JSON scrobbling history for `mpv`, which I send up to [my_feed](https://sean.fish/feed/?order_by=when&sort=desc&ftype=listen), as well as to a [websocket-based currently playing server](https://github.com/seanbreckenridge/currently_listening)
 
 ```
 1598956534118491075|1598957274.3349547|mpv-launched|1598957274.334953
